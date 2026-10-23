@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -21,6 +21,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Projeção da branch dados
+        run: |
+          if git ls-remote --exit-code --heads origin dados > /dev/null; then
+            git fetch --depth=1 origin dados
+            git show FETCH_HEAD:projecao.json > site/dados/projecao.json
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

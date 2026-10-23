@@ -139,7 +139,7 @@ def rodar(
     base = Base.ler(pasta or config.BASES / str(ano))
     if modelo is None:
         from eleicao.modelo import Modelo as modelo
-    saida = Saida(eleicao, base, destino or config.SITE / "dados" / "projecao.json", ler_validacao(config.DADOS / "ensaio"))
+    saida = Saida(eleicao, base, destino or config.SITE / "dados" / "projecao.json", ler_validacao(config.DADOS / "ensaio"), div.resultado("br"))
     try:
         asyncio.run(_laco(eleicao, div, base, modelo(base), saida, intervalo, ciclos, por_segundo))
     except KeyboardInterrupt:

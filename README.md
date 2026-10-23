@@ -34,20 +34,36 @@ O resultado fica em `data/ensaio/<ano>.json`.
 
 ## No domingo
 
+Deixe o computador na tomada. O `caffeinate -i` impede o macOS de dormir enquanto os comandos rodam. Sem ele,
+o Mac entra em repouso sozinho e o acompanhamento para.
+
 Em um terminal, rode o acompanhamento. Antes das 17h ele grava a fase `aguardando`:
 
 ```sh
-uv run eleicao ao-vivo --intervalo 30
+caffeinate -i uv run eleicao ao-vivo --intervalo 30
 ```
 
-Em outro terminal, sirva a página:
+Em outro terminal, publique a projeção no GitHub Pages:
+
+```sh
+caffeinate -i uv run eleicao publicar
+```
+
+A cada minuto, o `publicar` envia `site/dados/projecao.json` para a branch `dados` e dispara o workflow do
+Pages (`gh workflow run pages.yml --ref main`), que copia o arquivo dessa branch para o site. A `main` não
+recebe commits de dados. O comando precisa do `gh` logado com permissão de `workflow`.
+
+A página fica em https://ffreller.github.io/dashboard_eleicoes/. A contagem não depende do `publicar`. O
+navegador de cada leitor lê o arquivo nacional do TSE a cada 20 s, e a projeção chega a cada minuto.
+
+Se um dos processos cair, rode o mesmo comando de novo. A série já gravada é preservada, e o `publicar` não
+repete commits.
+
+Para ver a página localmente, sirva a pasta `site/`:
 
 ```sh
 uv run eleicao servir --porta 8000
 ```
-
-Para publicar, sirva a pasta `site/` em qualquer hospedagem estática e envie `site/dados/projecao.json` a
-cada ciclo. Se o processo cair, rode o mesmo comando de novo: a série já gravada é preservada.
 
 ## Ensaiar o domingo
 

@@ -421,6 +421,7 @@ class TseFalso:
 
             def _responder(self, status: int, corpo: bytes = b"", extra: dict | None = None, enviar: int | None = None) -> None:
                 self.send_response(status)
+                self.send_header("Access-Control-Allow-Origin", "*")
                 for k, v in (extra or {}).items():
                     self.send_header(k, v)
                 if status != 304:
