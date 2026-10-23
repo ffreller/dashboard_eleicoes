@@ -567,6 +567,7 @@ function desenharTabelaSerie() {
 /* Gráfico de comparação */
 
 const CURTO = { atual: "2026", "1t2026": "1º turno", "2t2022": "2022" };
+const CURTO_ESTREITO = { ...CURTO, "1t2026": "1ºT" };
 const sinal = (v, d = 1) => (Math.abs(v) < 0.5 * 10 ** -d ? n(0, d) : (v > 0 ? "+" : "−") + n(Math.abs(v), d));
 
 function curvasComparacao(d) {
@@ -600,7 +601,8 @@ function desenharComparacao() {
   const agora = d.fase === "apurando" && ultimo && ultimo.pct_secoes < 100;
   const W = Math.max(280, host.clientWidth);
   const H = Math.round(Math.min(480, Math.max(260, W * 0.42)));
-  const M = { t: agora ? 26 : 10, r: 92, b: 44, l: 42 };
+  const estreito = W < 480;
+  const M = { t: agora ? 26 : 10, r: estreito ? 72 : 92, b: 44, l: 42 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
   let min = 0, max = 0;
@@ -658,12 +660,12 @@ function desenharComparacao() {
     return { c, x: X(x) + 8, y: Math.min(M.t + ih - 2, Math.max(M.t + 8, Y(v) + 4)), v };
   }).sort((a, b) => a.y - b.y);
   fins.forEach((f, i) => {
-    const antes = fins.slice(0, i).filter((o) => Math.abs(o.x - f.x) < 76);
+    const antes = fins.slice(0, i).filter((o) => Math.abs(o.x - f.x) < (estreito ? 56 : 76));
     if (antes.length) f.y = Math.max(f.y, antes.at(-1).y + 13);
   });
   for (const f of fins) {
     const t = sv("text", { class: `rot-cmp cmp-${f.c.id}`, x: f.x, y: f.y });
-    t.textContent = `${CURTO[f.c.id]} ${sinal(f.v)}`;
+    t.textContent = `${(estreito ? CURTO_ESTREITO : CURTO)[f.c.id]} ${sinal(f.v)}`;
     svg.append(t);
     if (f.c.id === "atual") svg.append(sv("circle", { class: "ponto-cmp cmp-atual", cx: f.x - 8, cy: Y(f.v), r: 4.5 }));
   }
