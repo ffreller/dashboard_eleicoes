@@ -6,6 +6,7 @@ Rode da raiz do repositório: uv run python scripts/gerar_exemplos_fases.py
 
 import copy
 import json
+import math
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -18,10 +19,15 @@ def gravar(nome: str, doc: dict) -> None:
     print(nome, len(doc["serie"]), "pontos")
 
 
-def deslocar(faixa: dict | None, dp: float) -> dict | None:
-    if faixa is None:
-        return None
-    return {k: round(v + dp, 2) for k, v in faixa.items()}
+def faixa(centro: float, baixo: float, alto: float) -> dict:
+    """Faixa com a chance da esquerda passar de 50%, supondo a faixa de 95% normal."""
+    sd = (alto - baixo) / (2 * 1.96)
+    chance = (100.0 if centro > 50 else 0.0) if sd == 0 else 100 * 0.5 * (1 + math.erf((centro - 50) / sd / math.sqrt(2)))
+    return {"centro": round(centro, 2), "baixo": round(baixo, 2), "alto": round(alto, 2), "chance": round(chance, 1)}
+
+
+def deslocar(f: dict | None, dp: float) -> dict | None:
+    return None if f is None else faixa(f["centro"] + dp, f["baixo"] + dp, f["alto"] + dp)
 
 
 aguardando = copy.deepcopy(base)
@@ -75,11 +81,11 @@ for k, pct in enumerate((99.4, 99.8, 100.0), start=1):
         "pct_aptos": round(pct * 0.98, 2),
         "apurado": round(centro, 2),
         "votos_validos": int(118e6 * pct / 100),
-        "projecao": {"centro": round(centro, 2), "baixo": round(centro - largura, 2), "alto": round(centro + largura, 2)},
+        "projecao": faixa(centro, centro - largura, centro + largura),
     })
 encerrada["fase"] = "encerrada"
 encerrada["atualizado"] = encerrada["serie"][-1]["hora"]
 for u in encerrada["ufs"]:
     c = u["projecao"]["centro"]
-    u.update(pct_secoes=100.0, apurado=c, projecao={"centro": c, "baixo": c, "alto": c})
+    u.update(pct_secoes=100.0, apurado=c, projecao=faixa(c, c, c))
 gravar("encerrada", encerrada)

@@ -36,7 +36,9 @@ PROJECAO_DESDE_PCT = 1.0
 
 
 def _faixa(f: Faixa | None) -> dict | None:
-    return None if f is None else {"centro": round(f.centro, 2), "baixo": round(f.baixo, 2), "alto": round(f.alto, 2)}
+    if f is None:
+        return None
+    return {"centro": round(f.centro, 2), "baixo": round(f.baixo, 2), "alto": round(f.alto, 2), "chance": round(f.chance, 1)}
 
 
 def _hora(momento: datetime) -> str:

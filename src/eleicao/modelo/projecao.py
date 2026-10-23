@@ -127,7 +127,7 @@ class Modelo:
         def com_faixa(r: Recorte, c: float, amostra: np.ndarray) -> Recorte:
             q = (1 - self.par.nivel) / 2
             lo, hi = np.quantile(amostra, [q, 1 - q])
-            f = Faixa(centro=c, baixo=min(lo, c), alto=max(hi, c))
+            f = Faixa(centro=c, baixo=min(lo, c), alto=max(hi, c), chance=100 * float(np.mean(amostra > 50)))
             return Recorte(r.pct_secoes, r.pct_aptos, r.apurado, r.votos_validos, f)
 
         brasil = com_faixa(brasil, centro[0], sorteios[:, 0])

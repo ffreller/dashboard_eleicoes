@@ -11,7 +11,7 @@ pytestmark = pytest.mark.skipif(not (BASES / "2026" / "secoes.parquet").exists()
 
 
 def projecao(pct: float, apurado: float, pct_uf: float) -> Projecao:
-    f = Faixa(50.0, 49.0, 51.0)
+    f = Faixa(50.0, 49.0, 51.0, 50.0)
     uf = Recorte(pct_uf, pct_uf, apurado, 10, f)
     return Projecao(datetime(2026, 10, 25, 18), Recorte(pct, pct, apurado, 1000, f), {"sp": uf, "ba": uf})
 

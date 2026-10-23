@@ -40,7 +40,8 @@
    "projecao": {
     "centro": 52.11,
     "baixo": 50.67,
-    "alto": 53.54
+    "alto": 53.54,
+    "chance": 99.8
    }
   },
   {
@@ -52,7 +53,8 @@
    "projecao": {
     "centro": 52.02,
     "baixo": 50.89,
-    "alto": 53.15
+    "alto": 53.15,
+    "chance": 100.0
    }
   },
   {
@@ -64,7 +66,8 @@
    "projecao": {
     "centro": 51.78,
     "baixo": 50.79,
-    "alto": 52.77
+    "alto": 52.77,
+    "chance": 100.0
    }
   },
   {
@@ -76,7 +79,8 @@
    "projecao": {
     "centro": 51.79,
     "baixo": 50.88,
-    "alto": 52.7
+    "alto": 52.7,
+    "chance": 100.0
    }
   },
   {
@@ -88,7 +92,8 @@
    "projecao": {
     "centro": 51.82,
     "baixo": 50.97,
-    "alto": 52.66
+    "alto": 52.66,
+    "chance": 100.0
    }
   },
   {
@@ -100,7 +105,8 @@
    "projecao": {
     "centro": 51.97,
     "baixo": 51.17,
-    "alto": 52.77
+    "alto": 52.77,
+    "chance": 100.0
    }
   },
   {
@@ -112,7 +118,8 @@
    "projecao": {
     "centro": 51.86,
     "baixo": 51.08,
-    "alto": 52.63
+    "alto": 52.63,
+    "chance": 100.0
    }
   },
   {
@@ -124,7 +131,8 @@
    "projecao": {
     "centro": 52.05,
     "baixo": 51.3,
-    "alto": 52.79
+    "alto": 52.79,
+    "chance": 100.0
    }
   },
   {
@@ -136,7 +144,8 @@
    "projecao": {
     "centro": 52.03,
     "baixo": 51.31,
-    "alto": 52.75
+    "alto": 52.75,
+    "chance": 100.0
    }
   },
   {
@@ -148,7 +157,8 @@
    "projecao": {
     "centro": 52.17,
     "baixo": 51.46,
-    "alto": 52.87
+    "alto": 52.87,
+    "chance": 100.0
    }
   },
   {
@@ -160,7 +170,8 @@
    "projecao": {
     "centro": 52.12,
     "baixo": 51.43,
-    "alto": 52.81
+    "alto": 52.81,
+    "chance": 100.0
    }
   },
   {
@@ -172,7 +183,8 @@
    "projecao": {
     "centro": 51.88,
     "baixo": 51.2,
-    "alto": 52.56
+    "alto": 52.56,
+    "chance": 100.0
    }
   },
   {
@@ -184,7 +196,8 @@
    "projecao": {
     "centro": 51.94,
     "baixo": 51.27,
-    "alto": 52.6
+    "alto": 52.6,
+    "chance": 100.0
    }
   },
   {
@@ -196,7 +209,8 @@
    "projecao": {
     "centro": 51.9,
     "baixo": 51.24,
-    "alto": 52.55
+    "alto": 52.55,
+    "chance": 100.0
    }
   }
  ],
@@ -209,7 +223,8 @@
    "projecao": {
     "centro": 34.58,
     "baixo": 34.25,
-    "alto": 34.91
+    "alto": 34.91,
+    "chance": 0.0
    },
    "primeiro_turno": 30.0,
    "segundo_turno_anterior": 28.09
@@ -222,7 +237,8 @@
    "projecao": {
     "centro": 58.4,
     "baixo": 57.34,
-    "alto": 59.46
+    "alto": 59.46,
+    "chance": 100.0
    },
    "primeiro_turno": 58.0,
    "segundo_turno_anterior": 58.26
@@ -235,7 +251,8 @@
    "projecao": {
     "centro": 48.38,
     "baixo": 47.81,
-    "alto": 48.94
+    "alto": 48.94,
+    "chance": 0.0
    },
    "primeiro_turno": 47.0,
    "segundo_turno_anterior": 49.49
@@ -248,7 +265,8 @@
    "projecao": {
     "centro": 49.52,
     "baixo": 49.2,
-    "alto": 49.83
+    "alto": 49.83,
+    "chance": 0.1
    },
    "primeiro_turno": 45.0,
    "segundo_turno_anterior": 47.55
@@ -261,7 +279,8 @@
    "projecao": {
     "centro": 70.76,
     "baixo": 70.15,
-    "alto": 71.37
+    "alto": 71.37,
+    "chance": 100.0
    },
    "primeiro_turno": 70.0,
    "segundo_turno_anterior": 68.84
@@ -274,7 +293,8 @@
    "projecao": {
     "centro": 65.57,
     "baixo": 64.1,
-    "alto": 67.03
+    "alto": 67.03,
+    "chance": 100.0
    },
    "primeiro_turno": 66.0,
    "segundo_turno_anterior": 64.07
@@ -287,7 +307,8 @@
    "projecao": {
     "centro": 43.14,
     "baixo": 42.47,
-    "alto": 43.81
+    "alto": 43.81,
+    "chance": 0.0
    },
    "primeiro_turno": 38.0,
    "segundo_turno_anterior": 41.5
@@ -300,7 +321,8 @@
    "projecao": {
     "centro": 45.13,
     "baixo": 44.82,
-    "alto": 45.44
+    "alto": 45.44,
+    "chance": 0.0
    },
    "primeiro_turno": 40.0,
    "segundo_turno_anterior": 37.76
@@ -313,7 +335,8 @@
    "projecao": {
     "centro": 35.58,
     "baixo": 34.35,
-    "alto": 36.81
+    "alto": 36.81,
+    "chance": 0.0
    },
    "primeiro_turno": 35.0,
    "segundo_turno_anterior": 35.99
@@ -326,7 +349,8 @@
    "projecao": {
     "centro": 73.44,
     "baixo": 73.02,
-    "alto": 73.86
+    "alto": 73.86,
+    "chance": 100.0
    },
    "primeiro_turno": 69.0,
    "segundo_turno_anterior": 70.22
@@ -339,7 +363,8 @@
    "projecao": {
     "centro": 47.91,
     "baixo": 47.37,
-    "alto": 48.45
+    "alto": 48.45,
+    "chance": 0.0
    },
    "primeiro_turno": 48.0,
    "segundo_turno_anterior": 51.28
@@ -352,7 +377,8 @@
    "projecao": {
     "centro": 39.9,
     "baixo": 39.34,
-    "alto": 40.46
+    "alto": 40.46,
+    "chance": 0.0
    },
    "primeiro_turno": 36.0,
    "segundo_turno_anterior": 33.43
@@ -365,7 +391,8 @@
    "projecao": {
     "centro": 34.4,
     "baixo": 33.84,
-    "alto": 34.95
+    "alto": 34.95,
+    "chance": 0.0
    },
    "primeiro_turno": 33.0,
    "segundo_turno_anterior": 36.77
@@ -378,7 +405,8 @@
    "projecao": {
     "centro": 54.81,
     "baixo": 53.78,
-    "alto": 55.83
+    "alto": 55.83,
+    "chance": 100.0
    },
    "primeiro_turno": 53.0,
    "segundo_turno_anterior": 54.8
@@ -391,7 +419,8 @@
    "projecao": {
     "centro": 65.16,
     "baixo": 63.87,
-    "alto": 66.46
+    "alto": 66.46,
+    "chance": 100.0
    },
    "primeiro_turno": 65.0,
    "segundo_turno_anterior": 68.24
@@ -404,7 +433,8 @@
    "projecao": {
     "centro": 65.28,
     "baixo": 64.75,
-    "alto": 65.81
+    "alto": 65.81,
+    "chance": 100.0
    },
    "primeiro_turno": 65.0,
    "segundo_turno_anterior": 68.84
@@ -417,7 +447,8 @@
    "projecao": {
     "centro": 75.5,
     "baixo": 74.79,
-    "alto": 76.21
+    "alto": 76.21,
+    "chance": 100.0
    },
    "primeiro_turno": 74.0,
    "segundo_turno_anterior": 71.05
@@ -430,7 +461,8 @@
    "projecao": {
     "centro": 40.23,
     "baixo": 38.74,
-    "alto": 41.71
+    "alto": 41.71,
+    "chance": 0.0
    },
    "primeiro_turno": 35.0,
    "segundo_turno_anterior": 35.21
@@ -443,7 +475,8 @@
    "projecao": {
     "centro": 44.0,
     "baixo": 43.62,
-    "alto": 44.38
+    "alto": 44.38,
+    "chance": 0.0
    },
    "primeiro_turno": 42.0,
    "segundo_turno_anterior": 44.61
@@ -456,7 +489,8 @@
    "projecao": {
     "centro": 63.91,
     "baixo": 62.66,
-    "alto": 65.16
+    "alto": 65.16,
+    "chance": 100.0
    },
    "primeiro_turno": 63.0,
    "segundo_turno_anterior": 60.92
@@ -469,7 +503,8 @@
    "projecao": {
     "centro": 29.96,
     "baixo": 29.16,
-    "alto": 30.75
+    "alto": 30.75,
+    "chance": 0.0
    },
    "primeiro_turno": 29.0,
    "segundo_turno_anterior": 26.05
@@ -482,7 +517,8 @@
    "projecao": {
     "centro": 26.52,
     "baixo": 26.11,
-    "alto": 26.93
+    "alto": 26.93,
+    "chance": 0.0
    },
    "primeiro_turno": 25.0,
    "segundo_turno_anterior": 25.67
@@ -495,7 +531,8 @@
    "projecao": {
     "centro": 42.92,
     "baixo": 42.51,
-    "alto": 43.34
+    "alto": 43.34,
+    "chance": 0.0
    },
    "primeiro_turno": 41.0,
    "segundo_turno_anterior": 41.01
@@ -508,7 +545,8 @@
    "projecao": {
     "centro": 32.54,
     "baixo": 31.68,
-    "alto": 33.4
+    "alto": 33.4,
+    "chance": 0.0
    },
    "primeiro_turno": 30.0,
    "segundo_turno_anterior": 29.52
@@ -521,7 +559,8 @@
    "projecao": {
     "centro": 65.42,
     "baixo": 64.14,
-    "alto": 66.7
+    "alto": 66.7,
+    "chance": 100.0
    },
    "primeiro_turno": 66.0,
    "segundo_turno_anterior": 63.38
@@ -534,7 +573,8 @@
    "projecao": {
     "centro": 44.75,
     "baixo": 43.82,
-    "alto": 45.68
+    "alto": 45.68,
+    "chance": 0.0
    },
    "primeiro_turno": 41.0,
    "segundo_turno_anterior": 39.61
@@ -547,7 +587,8 @@
    "projecao": {
     "centro": 49.73,
     "baixo": 48.85,
-    "alto": 50.61
+    "alto": 50.61,
+    "chance": 27.4
    },
    "primeiro_turno": 47.0,
    "segundo_turno_anterior": 43.85
@@ -560,7 +601,8 @@
    "projecao": {
     "centro": 45.89,
     "baixo": 45.06,
-    "alto": 46.72
+    "alto": 46.72,
+    "chance": 0.0
    },
    "primeiro_turno": 45.0,
    "segundo_turno_anterior": 47.18

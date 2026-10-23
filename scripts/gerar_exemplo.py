@@ -32,7 +32,8 @@ for k in range(80):
     proj = None
     if pct >= 1:
         c = final + random.uniform(-0.25, 0.25) * largura
-        proj = {"centro": round(c, 2), "baixo": round(c - largura, 2), "alto": round(c + largura, 2)}
+        chance = 100 * 0.5 * (1 + math.erf((c - 50) / (largura / 1.96) / math.sqrt(2)))
+        proj = {"centro": round(c, 2), "baixo": round(c - largura, 2), "alto": round(c + largura, 2), "chance": round(chance, 1)}
     serie.append({
         "hora": hora.isoformat(timespec="seconds"),
         "pct_secoes": round(pct, 2),
@@ -54,7 +55,8 @@ for uf, nome in UFS.items():
         "nome": nome,
         "pct_secoes": pct,
         "apurado": round(c + random.uniform(-2, 2), 2),
-        "projecao": {"centro": round(c, 2), "baixo": round(c - w, 2), "alto": round(c + w, 2)},
+        "projecao": {"centro": round(c, 2), "baixo": round(c - w, 2), "alto": round(c + w, 2),
+                     "chance": round(100 * 0.5 * (1 + math.erf((c - 50) / (w / 1.96) / math.sqrt(2))), 1)},
         "primeiro_turno": float(PRIMEIRO[uf]),
         "segundo_turno_anterior": round(PRIMEIRO[uf] + random.uniform(-4, 4), 2),
     })

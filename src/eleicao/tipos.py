@@ -135,11 +135,13 @@ class Apuracao:
 
 @dataclass(frozen=True)
 class Faixa:
-    """Projeção da esquerda em % dos votos válidos, com a faixa de incerteza."""
+    """Projeção da esquerda em % dos votos válidos, com a faixa de incerteza e a chance (em %) de a
+    esquerda terminar com mais da metade dos votos válidos, que é a fração dos cenários sorteados."""
 
     centro: float
     baixo: float
     alto: float
+    chance: float
 
 
 @dataclass(frozen=True)
