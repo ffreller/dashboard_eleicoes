@@ -143,7 +143,7 @@ function desenharStatus() {
   const parado = d && d.fase === "apurando" && !d.exemplo && !estado.falha && Date.now() - Date.parse(d.atualizado) > PARADO_MIN * 60000;
   alerta.hidden = !(estado.falha || parado);
   alerta.classList.toggle("erro", !!estado.falha);
-  if (estado.falha) alerta.textContent = "A conexão falhou. Os números abaixo podem estar desatualizados.";
+  if (estado.falha) alerta.textContent = d ? "A conexão falhou. Os números abaixo podem estar desatualizados." : "A conexão falhou e ainda não há dados para mostrar.";
   else if (parado) alerta.textContent = `Os dados não mudam desde ${hms(d.atualizado)}. A atualização pode estar parada.`;
   tique();
 }
