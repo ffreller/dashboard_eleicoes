@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=12">
 <script>
 (function () {
   try {
@@ -49,68 +49,69 @@
   </div>
   <p id="alerta" class="alerta" hidden></p>
 
-  <section class="cartao hero" id="resposta" aria-labelledby="t-resposta">
+  <div class="abas" role="tablist" aria-label="Seções da página">
+    <button type="button" role="tab" id="aba-evolucao" aria-controls="evolucao" aria-selected="true">Projeção</button>
+    <button type="button" role="tab" id="aba-estados" aria-controls="estados" aria-selected="false" tabindex="-1">Estados</button>
+    <button type="button" role="tab" id="aba-como-funciona" aria-controls="como-funciona" aria-selected="false" tabindex="-1">Metodologia</button>
+  </div>
+
+  <section class="cartao" id="evolucao" role="tabpanel" aria-labelledby="aba-evolucao">
     <div class="hero-topo">
-      <h2 id="t-resposta" class="rotulo">Contagem até agora</h2>
+      <h2 id="t-evolucao">Contagem e projeção</h2>
       <span id="fase" class="fase"></span>
     </div>
 
-    <div id="hero-corpo" hidden>
-      <div class="placar">
-        <div class="lado lado-esq">
-          <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span><small class="cand-num" data-num="esq"></small></span>
-          <span class="pct" id="pct-esq"></span>
+    <div class="blocos" id="blocos" hidden>
+      <div class="bloco bloco-heroi" id="bloco-projecao">
+        <h3 class="rotulo">Projeção do resultado final</h3>
+        <div class="placar" id="proj-placar">
+          <div class="lado lado-esq">
+            <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
+            <span class="pct" id="proj-pct-esq"></span>
+            <span class="faixa-txt" id="faixa-esq"></span>
+          </div>
+          <div class="lado lado-dir">
+            <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
+            <span class="pct" id="proj-pct-dir"></span>
+            <span class="faixa-txt" id="faixa-dir"></span>
+          </div>
         </div>
-        <div class="lado lado-dir">
-          <span class="nome"><small class="cand-num" data-num="dir"></small><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
-          <span class="pct" id="pct-dir"></span>
+        <div class="chance" id="chance" hidden>
+          <p class="chance-rot">Chance de vencer</p>
+          <div class="chance-barra" aria-hidden="true"><span id="chance-barra"></span></div>
+          <div class="chance-vals">
+            <b id="chance-esq"></b>
+            <b id="chance-dir"></b>
+          </div>
+        </div>
+        <p class="faixa-txt" id="proj-aguarde" hidden></p>
+      </div>
+
+      <div class="blocos-sec">
+        <div class="bloco" id="bloco-contagem">
+          <h3 class="rotulo">Contagem até agora</h3>
+          <div class="placar">
+            <div class="lado lado-esq">
+              <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
+              <span class="pct" id="pct-esq"></span>
+            </div>
+            <div class="lado lado-dir">
+              <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
+              <span class="pct" id="pct-dir"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bloco" id="bloco-urnas">
+          <h3 class="rotulo">Urnas apuradas</h3>
+          <p class="pct" id="apuradas"></p>
+          <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
         </div>
       </div>
-      <div class="barra" id="barra-bruta" role="img">
-        <span class="marca-50"><span>50%</span></span>
-        <div class="trilho">
-          <span class="seg seg-esq"></span>
-          <span class="seg seg-dir"></span>
-        </div>
-      </div>
-      <p id="apuradas" class="apuradas"></p>
-      <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
     </div>
 
     <p id="frase" class="frase"></p>
-  </section>
-
-  <section class="cartao" id="projecao" aria-labelledby="t-projecao" hidden>
-    <h2 id="t-projecao" class="rotulo">Projeção do resultado final</h2>
-    <div class="placar">
-      <div class="lado lado-esq">
-        <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
-        <span class="pct pct-proj" id="proj-pct-esq"></span>
-        <span class="faixa-txt" id="faixa-esq"></span>
-        <span class="chance-txt">Chance de vencer <b id="chance-esq"></b></span>
-      </div>
-      <div class="lado lado-dir">
-        <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
-        <span class="pct pct-proj" id="proj-pct-dir"></span>
-        <span class="faixa-txt" id="faixa-dir"></span>
-        <span class="chance-txt">Chance de vencer <b id="chance-dir"></b></span>
-      </div>
-    </div>
-    <div class="barra" id="barra-proj" role="img">
-      <span class="marca-50"><span>50%</span></span>
-      <div class="trilho">
-        <span class="seg seg-esq"></span>
-        <span class="seg seg-dir"></span>
-        <span class="banda" id="banda"></span>
-      </div>
-    </div>
-    <p id="legenda-banda" class="legenda-banda"><i aria-hidden="true"></i><span id="legenda-banda-txt"></span></p>
-  </section>
-
-  <section class="cartao" id="evolucao" aria-labelledby="t-evolucao">
-    <h2 id="t-evolucao">Contagem e projeção</h2>
-    <p class="dek">Percentual de cada candidato nos votos válidos, conforme as seções vão sendo apuradas. Linha contínua é a contagem até agora. Linha pontilhada leva até a projeção do resultado final, com a faixa em tom claro.</p>
-    <div id="leitura" class="leitura"></div>
+    <p class="dek">Linha contínua é a contagem até agora. Linha pontilhada leva à projeção do resultado final, com a faixa de incerteza em tom claro.</p>
     <div id="grafico" class="grafico"></div>
     <details class="tabela-gemea" id="serie-tabela">
       <summary>Ver os pontos do gráfico em tabela</summary>
@@ -118,7 +119,7 @@
     </details>
   </section>
 
-  <section class="cartao" id="estados" aria-labelledby="t-estados">
+  <section class="cartao" id="estados" role="tabpanel" aria-labelledby="aba-estados" hidden>
     <h2 id="t-estados">Estado por estado</h2>
     <p class="dek">Cor pela projeção em cada estado. A barra na base de cada quadrado mostra quanto das seções já foi apurado.</p>
     <div id="mapa" class="mapa" role="group" aria-label="Mapa de quadrados dos estados brasileiros"></div>
@@ -130,8 +131,8 @@
     <div class="rolagem" id="tabela-estados" tabindex="0" role="region" aria-label="Tabela dos estados, role para os lados para ver todas as colunas"></div>
   </section>
 
-  <section class="cartao" id="como-funciona" aria-labelledby="t-como">
-    <h2 id="t-como">Como funciona</h2>
+  <section class="cartao" id="como-funciona" role="tabpanel" aria-labelledby="aba-como-funciona" hidden>
+    <h2 id="t-como">Metodologia: como funciona</h2>
     <p>Durante a contagem, os primeiros votos a chegar quase nunca são um retrato do país inteiro. Cada região termina de apurar numa hora diferente. Por isso a projeção não olha só o total parcial.</p>
     <ol class="passos">
       <li><strong>Comparar.</strong> Para cada seção eleitoral já apurada, vemos como ela votou agora e como votou no 2º turno de 2022 e no 1º turno de 2026.</li>
@@ -185,6 +186,6 @@
 </footer>
 
 <noscript><p class="miolo">Esta página precisa de JavaScript para mostrar a apuração.</p></noscript>
-<script src="app.js?v=3" defer></script>
+<script src="app.js?v=9" defer></script>
 </body>
 </html>

@@ -184,17 +184,6 @@ function iniciarTema() {
 
 /* Resposta */
 
-function setBarra(barra, centro, banda) {
-  barra.querySelector(".seg-esq").style.setProperty("flex-basis", `${centro}%`);
-  const b = barra.querySelector(".banda");
-  if (!b) return;
-  b.hidden = !banda;
-  if (banda) {
-    b.style.setProperty("--lo", `${banda.baixo}%`);
-    b.style.setProperty("--hi", `${banda.alto}%`);
-  }
-}
-
 function pctHtml(alvo, txt) {
   alvo.replaceChildren(txt === "–" ? "–" : txt.slice(0, -1), ...(txt === "–" ? [] : [el("small", { text: "%" })]));
 }
@@ -225,42 +214,41 @@ function desenharResposta() {
   const nm = nomes(d);
 
   for (const e of document.querySelectorAll("[data-nome]")) e.textContent = nm[e.dataset.nome];
-  for (const e of document.querySelectorAll("[data-num]")) {
-    const c = d.candidatos[e.dataset.num];
-    e.textContent = `${c.numero} · ${c.partido}`;
-  }
-  $("legenda-banda-txt").textContent = `Faixa de incerteza da projeção (${n(d.nivel_faixa, 0)}%)`;
   $("fase").textContent = ROTULO_FASE[d.fase];
   $("fase").dataset.fase = d.fase;
-  $("t-resposta").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem até agora";
+  $("t-evolucao").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem e projeção";
 
   const u = sit.u;
   const apurado = sit.tipo === "encerrada" ? (u.apurado ?? u.projecao?.centro) : u?.apurado;
   const temNumeros = sit.tipo !== "aguardando" && apurado != null;
-  $("hero-corpo").hidden = !temNumeros;
+  $("blocos").hidden = !temNumeros;
   if (temNumeros) {
     pctHtml($("pct-esq"), pc(apurado));
     pctHtml($("pct-dir"), pc(100 - apurado));
-    setBarra($("barra-bruta"), apurado, null);
-    $("barra-bruta").setAttribute("aria-label", `Contagem: ${nm.esq} ${pc(apurado)}, ${nm.dir} ${pc(100 - apurado)}.`);
-    $("apuradas").textContent = `${pc(u.pct_secoes, 2)} das seções apuradas`;
+    pctHtml($("apuradas"), pc(u.pct_secoes, 2));
     $("progresso").style.setProperty("--p", `${u.pct_secoes}%`);
   }
 
   $("frase").textContent = frase(d, sit, nm);
 
   const proj = sit.tipo === "cruza" || sit.tipo === "um-lado" ? u.projecao : null;
-  $("projecao").hidden = !proj;
+  const aguarde = $("proj-aguarde");
+  $("bloco-projecao").hidden = d.fase === "encerrada";
+  aguarde.hidden = !!proj;
+  aguarde.textContent = `Aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas.`;
+  $("proj-placar").hidden = !proj;
   if (proj) {
     pctHtml($("proj-pct-esq"), pc(proj.centro));
     pctHtml($("proj-pct-dir"), pc(100 - proj.centro));
-    setBarra($("barra-proj"), proj.centro, proj);
-    $("barra-proj").setAttribute("aria-label", `Projeção: ${nm.esq} ${pc(proj.centro)}, ${nm.dir} ${pc(100 - proj.centro)}. Faixa de ${n(d.nivel_faixa, 0)}% para ${nm.esq}: de ${pc(proj.baixo)} a ${pc(proj.alto)}.`);
     $("faixa-esq").textContent = `faixa: ${n(proj.baixo)} a ${n(proj.alto)}`;
     $("faixa-dir").textContent = `faixa: ${n(100 - proj.alto)} a ${n(100 - proj.baixo)}`;
     const ch = chanceDe(d, u);
-    $("chance-esq").textContent = ch?.esq ?? "–";
-    $("chance-dir").textContent = ch?.dir ?? "–";
+    $("chance").hidden = !ch;
+    if (ch) {
+      $("chance-esq").textContent = ch.esq;
+      $("chance-dir").textContent = ch.dir;
+      $("chance-barra").style.setProperty("--p", `${u.projecao.chance}%`);
+    }
   }
 }
 
@@ -325,13 +313,12 @@ function desenharGrafico() {
   desenhoGrafico = null;
   if (!serie.length) {
     host.append(el("p", { class: "leitura-vazia", text: "O gráfico aparece quando os primeiros resultados chegarem." }));
-    desenharLeitura();
     return;
   }
 
   const nm = nomes(d);
   const W = Math.max(280, host.clientWidth);
-  const H = Math.round(Math.min(360, Math.max(260, W * 0.7)));
+  const H = Math.round(Math.min(560, Math.max(300, W * 0.68)));
   const M = { t: 10, r: 14, b: 44, l: 42 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
@@ -378,17 +365,10 @@ function desenharGrafico() {
   }
   const titulo = sv("text", { x: M.l + iw / 2, y: H - 6, "text-anchor": "middle" });
   titulo.textContent = "% das seções apuradas";
-  const zonaRot = (cls, y, seta, nome) => {
-    const t = sv("text", { class: "zona-rot", x: M.l + iw - 6, y, "text-anchor": "end" });
-    t.append(sv("tspan", { class: cls }, seta), ` ${nome} à frente`);
-    return t;
-  };
-  const rotEsq = zonaRot("cor-esq", M.t + 14, "▲", nm.esq);
-  const rotDir = zonaRot("cor-dir", M.t + ih - 8, "▼", nm.dir);
   svg.append(
     sv("line", { class: "eixo", x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih }),
     sv("line", { class: "ref50", x1: M.l, x2: M.l + iw, y1: y50, y2: y50 }),
-    titulo, rotEsq, rotDir,
+    titulo,
   );
 
   const pto = (x, y) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`;
@@ -456,14 +436,12 @@ function desenharGrafico() {
   });
 
   desenharMira();
-  desenharLeitura();
 }
 
 function definirIdx(i) {
   if (i === estado.idx) return;
   estado.idx = i;
   desenharMira();
-  desenharLeitura();
 }
 
 function desenharMira() {
@@ -480,37 +458,6 @@ function desenharMira() {
     if (ok) { circulos[k].setAttribute("cx", g.X(q.pct_secoes)); circulos[k].setAttribute("cy", g.Y(v)); }
   });
   g.mira.setAttribute("visibility", "visible");
-}
-
-function desenharLeitura() {
-  const d = estado.dados;
-  const host = $("leitura");
-  host.hidden = !d.serie.length;
-  if (!d.serie.length) return;
-  const nm = nomes(d);
-  const i = estado.idx != null && estado.idx < d.serie.length ? estado.idx : null;
-  const q = d.serie[i ?? d.serie.length - 1];
-  const topo = el("div", { class: "leitura-topo", text: `${i == null ? "Último ponto" : "Ponto escolhido"}: ${hm(q.hora)}, com ${pc(q.pct_secoes, 2)} das seções apuradas` });
-  const par = (tipo, esq, dir) => [
-    el("span", { class: "item" }, el("span", { class: `chave ${tipo} cor-esq`, "aria-hidden": "true" }), `${nm.esq} ${esq}`),
-    el("span", { class: "item" }, el("span", { class: `chave ${tipo} cor-dir`, "aria-hidden": "true" }), `${nm.dir} ${dir}`),
-  ];
-  const linha = (titulo, ...itens) => el("div", { class: "leitura-linha" }, el("b", { text: titulo }), el("div", { class: "valores" }, itens.flat()));
-  const p = q.projecao;
-  const ch = chanceDe(d, q);
-  host.replaceChildren(...[
-    topo,
-    p
-      ? linha("Projeção", par("chave-proj", pc(p.centro), pc(100 - p.centro)),
-        p.alto - p.baixo > 0.005 ? el("span", { class: "item", text: `faixa de ${nm.esq}: ${n(p.baixo)} a ${n(p.alto)}` }) : null)
-      : linha("Projeção", el("span", { class: "item", text: `ainda não disponível (aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções)` })),
-    q.apurado != null
-      ? linha("Contagem", par("chave-bruta", pc(q.apurado), pc(100 - q.apurado)))
-      : linha("Contagem", el("span", { class: "item", text: "sem votos contados" })),
-    ch ? linha("Chance de vencer",
-      el("span", { class: "item" }, el("i", { class: "ponto ponto-esq", "aria-hidden": "true" }), `${nm.esq} ${ch.esq}`),
-      el("span", { class: "item" }, el("i", { class: "ponto ponto-dir", "aria-hidden": "true" }), `${nm.dir} ${ch.dir}`)) : null,
-  ].filter(Boolean));
 }
 
 function desenharTabelaSerie() {
@@ -705,8 +652,34 @@ function desenhar() {
   desenharValidacao();
 }
 
+function iniciarAbas() {
+  const abas = [...document.querySelectorAll('[role="tab"]')];
+  const mostrar = (aba, foco) => {
+    for (const a of abas) {
+      const ativa = a === aba;
+      a.setAttribute("aria-selected", ativa);
+      a.tabIndex = ativa ? 0 : -1;
+      $(a.getAttribute("aria-controls")).hidden = !ativa;
+    }
+    if (foco) aba.focus();
+    history.replaceState(null, "", aba === abas[0] ? location.pathname + location.search : `#${aba.getAttribute("aria-controls")}`);
+  };
+  abas.forEach((a, i) => {
+    a.addEventListener("click", () => mostrar(a));
+    a.addEventListener("keydown", (e) => {
+      const passo = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (passo) { e.preventDefault(); mostrar(abas[(i + passo + abas.length) % abas.length], true); }
+      else if (e.key === "Home") { e.preventDefault(); mostrar(abas[0], true); }
+      else if (e.key === "End") { e.preventDefault(); mostrar(abas.at(-1), true); }
+    });
+  });
+  const inicial = abas.find((a) => a.getAttribute("aria-controls") === location.hash.slice(1));
+  if (inicial) mostrar(inicial);
+}
+
 function iniciar() {
   iniciarTema();
+  iniciarAbas();
   $("serie-tabela").addEventListener("toggle", desenharTabelaSerie);
   let larguraAnterior = 0;
   new ResizeObserver(([e]) => {
