@@ -78,6 +78,18 @@
         </div>
       </div>
       <p id="legenda-banda" class="legenda-banda" hidden><i aria-hidden="true"></i><span id="legenda-banda-txt"></span></p>
+
+      <div id="chance" class="chance" hidden>
+        <h3 class="rotulo">Chance de vencer</h3>
+        <div class="chance-nums">
+          <p class="chance-lado"><span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span><b id="chance-esq"></b></p>
+          <p class="chance-lado chance-dir"><span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span><b id="chance-dir"></b></p>
+        </div>
+        <div class="barra barra-chance" id="barra-chance" role="img">
+          <div class="trilho"><span class="seg seg-esq"></span><span class="seg seg-dir"></span></div>
+        </div>
+        <p class="nota">Esta chance sai das mesmas simulações que desenham a faixa. É uma estimativa não oficial e pode mudar à medida que a contagem avança.</p>
+      </div>
     </div>
 
     <p id="frase" class="frase"></p>
@@ -102,7 +114,7 @@
 
   <section class="cartao" id="evolucao" aria-labelledby="t-evolucao">
     <h2 id="t-evolucao">Como a projeção evoluiu</h2>
-    <p class="dek">Percentual de <span data-nome="esq"></span> nos votos válidos, conforme as seções vão sendo apuradas. Acima da linha dos 50% <span data-nome="esq"></span> está à frente, abaixo está <span data-nome="dir"></span>.</p>
+    <p class="dek">Percentual de cada candidato nos votos válidos, conforme as seções vão sendo apuradas. Linha contínua é a projeção, com a faixa em tom claro. Linha tracejada é a contagem até agora.</p>
     <div id="leitura" class="leitura"></div>
     <div id="grafico" class="grafico"></div>
     <details class="tabela-gemea" id="serie-tabela">
@@ -133,6 +145,7 @@
       <li><strong>Somar.</strong> A projeção é o que já foi contado mais a estimativa do que falta contar.</li>
     </ol>
     <p>A <strong>faixa</strong> mostra a incerteza: quanto a estimativa ainda pode errar. Ela começa larga, quando pouco foi apurado, e vai estreitando conforme a contagem avança. Enquanto a faixa ainda cruza os 50%, o resultado está em aberto.</p>
+    <p>A <strong>chance de vencer</strong> sai das mesmas simulações: é a parcela dos cenários simulados em que cada candidato termina com mais da metade dos votos válidos. Se um candidato aparece com 30%, ele terminou na frente em cerca de 30 de cada 100 cenários. Não é uma pesquisa de opinião nem uma garantia, e o número muda conforme a contagem avança.</p>
 
     <details class="detalhes" id="detalhes-tecnicos">
       <summary>Detalhes técnicos</summary>

@@ -126,6 +126,15 @@ function nomes(d) {
   return { esq: curto(e.nome), dir: curto(r.nome), inicialEsq: curto(e.nome)[0], inicialDir: curto(r.nome)[0] };
 }
 
+// Nunca mostra 100% nem 0%: com 200 cenários, o extremo só diz que nenhum virou.
+function rotulosChance(chance) {
+  const e = Math.round(chance);
+  const lado = (v, arred) => (v > 99 ? "mais de 99%" : v < 1 ? "menos de 1%" : `${arred}%`);
+  return { esq: lado(chance, e), dir: lado(100 - chance, 100 - e) };
+}
+
+const chanceDe = (d, q) => (d.fase === "apurando" && q.projecao?.chance != null ? rotulosChance(q.projecao.chance) : null);
+
 /* Status e tema */
 
 function desenharStatus() {
@@ -259,6 +268,16 @@ function desenharResposta() {
     $("faixa-dir").textContent = proj ? `faixa: ${n(100 - proj.alto)} a ${n(100 - proj.baixo)}` : "";
   }
 
+  const ch = sit.u ? chanceDe(d, sit.u) : null;
+  $("chance").hidden = !ch;
+  if (ch) {
+    $("chance-esq").textContent = ch.esq;
+    $("chance-dir").textContent = ch.dir;
+    // Limita a barra a 1%–99% para nenhum lado sumir.
+    setBarra($("barra-chance"), Math.min(99, Math.max(1, sit.u.projecao.chance)), null);
+    $("barra-chance").setAttribute("aria-label", `Chance de vencer: ${nm.esq} ${ch.esq}, ${nm.dir} ${ch.dir}.`);
+  }
+
   $("frase").textContent = frase(d, sit, nm);
 
   const u = sit.u;
@@ -295,6 +314,16 @@ function segmentos(serie, pega) {
 
 let desenhoGrafico = null;
 
+function pontosDe(q) {
+  const espelho = (v) => (v == null ? null : 100 - v);
+  return [
+    ["ponto-bruto cor-esq", q.apurado, 4.5],
+    ["ponto-bruto cor-dir", espelho(q.apurado), 4.5],
+    ["ponto-proj cor-esq", q.projecao?.centro, 5],
+    ["ponto-proj cor-dir", espelho(q.projecao?.centro), 5],
+  ];
+}
+
 function desenharGrafico() {
   const d = estado.dados;
   const host = $("grafico");
@@ -313,39 +342,34 @@ function desenharGrafico() {
   const M = { t: 10, r: 14, b: 44, l: 42 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
-  let lo = 50, hi = 50;
+  // Eixo simétrico em torno de 50%: as linhas dos dois candidatos são espelhos uma da outra.
+  let desvio = 3;
   for (const q of serie) {
     if (q.pct_secoes < d.projecao_desde_pct) continue;
     for (const v of [q.apurado, q.projecao?.baixo, q.projecao?.alto]) {
-      if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+      if (v != null) desvio = Math.max(desvio, Math.abs(v - 50));
     }
   }
-  if (hi - lo < 6) { const m = (hi + lo) / 2; lo = Math.min(lo, m - 3); hi = Math.max(hi, m + 3); }
-  const folga = (hi - lo) * 0.08;
-  lo = Math.max(0, lo - folga);
-  hi = Math.min(100, hi + folga);
+  desvio = Math.min(50, desvio * 1.16);
+  const lo = 50 - desvio, hi = 50 + desvio;
 
   const X = (p) => M.l + (p / 100) * iw;
   const Y = (v) => M.t + ((hi - v) / (hi - lo)) * ih;
 
   const passo = passoNice(hi - lo, 5);
   const ticksY = [];
-  for (let v = Math.ceil(lo / passo) * passo; v <= hi + 1e-9; v += passo) ticksY.push(Math.round(v * 100) / 100);
+  for (let k = -Math.floor(desvio / passo + 1e-9); k <= Math.floor(desvio / passo + 1e-9); k++) ticksY.push(Math.round((50 + k * passo) * 100) / 100);
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0", focusable: "true" });
   const ultimo = serie.at(-1);
   svg.setAttribute("aria-label", `Gráfico da evolução. Último ponto: ${pc(ultimo.pct_secoes, 1)} das seções apuradas`
-    + (ultimo.projecao ? `, projeção de ${nm.esq} em ${pc(ultimo.projecao.centro)}` : "")
+    + (ultimo.projecao ? `, projeção de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
     + `. Use as setas do teclado para percorrer os pontos. Os mesmos dados estão na tabela abaixo.`);
 
   const recorte = sv("clipPath", { id: "recorte" }, sv("rect", { x: M.l, y: M.t, width: iw, height: ih }));
   svg.append(sv("defs", {}, recorte));
 
   const y50 = Y(50);
-  svg.append(
-    sv("rect", { class: "zona-esq", x: M.l, y: M.t, width: iw, height: y50 - M.t }),
-    sv("rect", { class: "zona-dir", x: M.l, y: y50, width: iw, height: M.t + ih - y50 }),
-  );
 
   for (const v of ticksY) {
     if (v === 50) continue;
@@ -364,38 +388,44 @@ function desenharGrafico() {
   }
   const titulo = sv("text", { x: M.l + iw / 2, y: H - 6, "text-anchor": "middle" });
   titulo.textContent = "% das seções apuradas";
-  const rotEsq = sv("text", { class: "zona-rot", x: M.l + iw - 6, y: M.t + 14, "text-anchor": "end" });
-  rotEsq.textContent = `▲ ${nm.esq} à frente`;
-  const rotDir = sv("text", { class: "zona-rot", x: M.l + iw - 6, y: M.t + ih - 8, "text-anchor": "end" });
-  rotDir.textContent = `▼ ${nm.dir} à frente`;
+  const zonaRot = (cls, y, seta, nome) => {
+    const t = sv("text", { class: "zona-rot", x: M.l + iw - 6, y, "text-anchor": "end" });
+    t.append(sv("tspan", { class: cls }, seta), ` ${nome} à frente`);
+    return t;
+  };
+  const rotEsq = zonaRot("cor-esq", M.t + 14, "▲", nm.esq);
+  const rotDir = zonaRot("cor-dir", M.t + ih - 8, "▼", nm.dir);
   svg.append(
     sv("line", { class: "eixo", x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih }),
     sv("line", { class: "ref50", x1: M.l, x2: M.l + iw, y1: y50, y2: y50 }),
     titulo, rotEsq, rotDir,
   );
 
-  const area = [];
-  for (const seg of segmentos(serie, (q) => q.projecao)) {
-    const cima = seg.map(([q, pr]) => `${X(q.pct_secoes).toFixed(1)},${Y(pr.alto).toFixed(1)}`);
-    const baixo = seg.map(([q, pr]) => `${X(q.pct_secoes).toFixed(1)},${Y(pr.baixo).toFixed(1)}`).reverse();
-    area.push(`M${cima.join("L")}L${baixo.join("L")}Z`);
-  }
-  const linha = (segs, f) => segs.map((s) => "M" + s.map(([q, v]) => `${X(q.pct_secoes).toFixed(1)},${Y(f(v)).toFixed(1)}`).join("L")).join("");
+  const pto = (q, y) => `${X(q.pct_secoes).toFixed(1)},${Y(y).toFixed(1)}`;
+  const area = (f) => segmentos(serie, (q) => q.projecao).map((seg) =>
+    `M${seg.map(([q, pr]) => pto(q, f(pr).alto)).join("L")}L${seg.map(([q, pr]) => pto(q, f(pr).baixo)).reverse().join("L")}Z`).join("");
+  const linha = (pega, f) => segmentos(serie, pega).map((s) => "M" + s.map(([q, v]) => pto(q, f(v))).join("L")).join("");
+  const igual = (pr) => pr;
+  const espelho = (pr) => ({ baixo: 100 - pr.alto, alto: 100 - pr.baixo });
+  const espelhar = (v) => 100 - v;
   const grupo = sv("g", { "clip-path": "url(#recorte)" },
-    sv("path", { class: "faixa-area", d: area.join("") }),
-    sv("path", { class: "linha-bruta", d: linha(segmentos(serie, (q) => q.apurado), (v) => v) }),
-    sv("path", { class: "linha-proj", d: linha(segmentos(serie, (q) => q.projecao), (v) => v.centro) }),
+    sv("path", { class: "faixa-area cor-esq", d: area(igual) }),
+    sv("path", { class: "faixa-area cor-dir", d: area(espelho) }),
+    sv("path", { class: "linha-bruta cor-esq", d: linha((q) => q.apurado, igual) }),
+    sv("path", { class: "linha-bruta cor-dir", d: linha((q) => q.apurado, espelhar) }),
+    sv("path", { class: "linha-proj cor-esq", d: linha((q) => q.projecao?.centro, igual) }),
+    sv("path", { class: "linha-proj cor-dir", d: linha((q) => q.projecao?.centro, espelhar) }),
   );
   svg.append(grupo);
 
-  const pontoFinal = (cls, q, v, r) => sv("circle", { class: cls, cx: X(q.pct_secoes), cy: Y(v), r });
-  if (ultimo.apurado != null && ultimo.apurado >= lo && ultimo.apurado <= hi) svg.append(pontoFinal("ponto-bruto", ultimo, ultimo.apurado, 4.5));
-  if (ultimo.projecao) svg.append(pontoFinal("ponto-proj", ultimo, ultimo.projecao.centro, 5));
+  const dentro = (v) => v != null && v >= lo && v <= hi;
+  for (const [cls, v, r] of pontosDe(ultimo)) {
+    if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(ultimo.pct_secoes), cy: Y(v), r }));
+  }
 
   const mira = sv("g", { visibility: "hidden", "pointer-events": "none" },
     sv("line", { class: "mira", y1: M.t, y2: M.t + ih }),
-    sv("circle", { class: "ponto-bruto", r: 4.5 }),
-    sv("circle", { class: "ponto-proj", r: 5 }),
+    ...pontosDe({}).map(([cls, , r]) => sv("circle", { class: cls, r })),
   );
   svg.append(mira);
 
@@ -445,13 +475,13 @@ function desenharMira() {
   const i = estado.idx;
   if (i == null || i >= g.serie.length) { g.mira.setAttribute("visibility", "hidden"); return; }
   const q = g.serie[i];
-  const [linha, bruto, proj] = g.mira.children;
+  const [linha, ...circulos] = g.mira.children;
   linha.setAttribute("x1", g.X(q.pct_secoes)); linha.setAttribute("x2", g.X(q.pct_secoes));
-  const dentro = (v) => v != null && v >= g.lo && v <= g.hi;
-  bruto.setAttribute("visibility", dentro(q.apurado) ? "visible" : "hidden");
-  proj.setAttribute("visibility", q.projecao ? "visible" : "hidden");
-  if (dentro(q.apurado)) { bruto.setAttribute("cx", g.X(q.pct_secoes)); bruto.setAttribute("cy", g.Y(q.apurado)); }
-  if (q.projecao) { proj.setAttribute("cx", g.X(q.pct_secoes)); proj.setAttribute("cy", g.Y(q.projecao.centro)); }
+  pontosDe(q).forEach(([, v], k) => {
+    const ok = v != null && v >= g.lo && v <= g.hi;
+    circulos[k].setAttribute("visibility", ok ? "visible" : "hidden");
+    if (ok) { circulos[k].setAttribute("cx", g.X(q.pct_secoes)); circulos[k].setAttribute("cy", g.Y(v)); }
+  });
   g.mira.setAttribute("visibility", "visible");
 }
 
@@ -464,23 +494,26 @@ function desenharLeitura() {
   const i = estado.idx != null && estado.idx < d.serie.length ? estado.idx : null;
   const q = d.serie[i ?? d.serie.length - 1];
   const topo = el("div", { class: "leitura-topo", text: `${i == null ? "Último ponto" : "Ponto escolhido"}: ${hm(q.hora)}, com ${pc(q.pct_secoes, 2)} das seções apuradas` });
-  const linhaProj = el("div", { class: "leitura-linha" },
-    el("span", { class: "chave chave-proj", "aria-hidden": "true" }),
-    q.projecao
-      ? el("div", { class: "valores" }, el("b", { text: "Projeção" }),
-        el("span", { text: `${nm.esq} ${pc(q.projecao.centro)}` }),
-        el("span", { text: `${nm.dir} ${pc(100 - q.projecao.centro)}` }),
-        q.projecao.alto - q.projecao.baixo > 0.005 ? el("span", { text: `faixa de ${nm.esq}: ${n(q.projecao.baixo)} a ${n(q.projecao.alto)}` }) : null)
-      : el("div", { class: "valores" }, el("b", { text: "Projeção" }), el("span", { text: `ainda não disponível (aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções)` })),
-  );
-  const linhaBruta = el("div", { class: "leitura-linha" },
-    el("span", { class: "chave chave-bruta", "aria-hidden": "true" }),
-    el("div", { class: "valores" }, el("b", { text: "Contagem" }),
-      q.apurado != null
-        ? [el("span", { text: `${nm.esq} ${pc(q.apurado)}` }), el("span", { text: `${nm.dir} ${pc(100 - q.apurado)}` })]
-        : el("span", { text: "sem votos contados" })),
-  );
-  host.replaceChildren(topo, linhaProj, linhaBruta);
+  const par = (tipo, esq, dir) => [
+    el("span", { class: "item" }, el("span", { class: `chave ${tipo} cor-esq`, "aria-hidden": "true" }), `${nm.esq} ${esq}`),
+    el("span", { class: "item" }, el("span", { class: `chave ${tipo} cor-dir`, "aria-hidden": "true" }), `${nm.dir} ${dir}`),
+  ];
+  const linha = (titulo, ...itens) => el("div", { class: "leitura-linha" }, el("b", { text: titulo }), el("div", { class: "valores" }, itens.flat()));
+  const p = q.projecao;
+  const ch = chanceDe(d, q);
+  host.replaceChildren(...[
+    topo,
+    p
+      ? linha("Projeção", par("chave-proj", pc(p.centro), pc(100 - p.centro)),
+        p.alto - p.baixo > 0.005 ? el("span", { class: "item", text: `faixa de ${nm.esq}: ${n(p.baixo)} a ${n(p.alto)}` }) : null)
+      : linha("Projeção", el("span", { class: "item", text: `ainda não disponível (aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções)` })),
+    q.apurado != null
+      ? linha("Contagem", par("chave-bruta", pc(q.apurado), pc(100 - q.apurado)))
+      : linha("Contagem", el("span", { class: "item", text: "sem votos contados" })),
+    ch ? linha("Chance de vencer",
+      el("span", { class: "item" }, el("i", { class: "ponto ponto-esq", "aria-hidden": "true" }), `${nm.esq} ${ch.esq}`),
+      el("span", { class: "item" }, el("i", { class: "ponto ponto-dir", "aria-hidden": "true" }), `${nm.dir} ${ch.dir}`)) : null,
+  ].filter(Boolean));
 }
 
 function desenharTabelaSerie() {
@@ -489,17 +522,20 @@ function desenharTabelaSerie() {
   if (!$("serie-tabela").open) return;
   const nm = nomes(d);
   const f = (v) => (v == null ? "–" : n(v));
+  const comChance = d.fase === "apurando";
+  const chance = (q) => { const c = chanceDe(d, q); return c ? `${c.esq} / ${c.dir}` : "–"; };
   const linhas = [...d.serie].reverse().map((q) => el("tr", {},
     el("th", { scope: "row", text: hm(q.hora) }),
     el("td", { text: pc(q.pct_secoes, 2) }),
     el("td", { text: f(q.apurado) }),
     el("td", { text: f(q.projecao?.centro) }),
     el("td", { text: q.projecao ? `${n(q.projecao.baixo)} a ${n(q.projecao.alto)}` : "–" }),
+    comChance ? el("td", { text: chance(q) }) : null,
   ));
   corpo.replaceChildren(el("table", {},
     el("caption", { class: "vh", text: `Evolução da contagem e da projeção, em % de ${nm.esq} nos votos válidos` }),
     el("thead", {}, el("tr", {},
-      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção"].map((t) => el("th", { scope: "col", text: t })))),
+      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
     el("tbody", {}, linhas)));
 }
 
