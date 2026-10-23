@@ -342,11 +342,12 @@ function desenharGrafico() {
   const nm = nomes(d);
   const W = Math.max(280, host.clientWidth);
   const H = Math.round(Math.min(560, Math.max(300, W * 0.68)));
-  const M = { t: 10, r: 14, b: 44, l: 42 };
+  const ultimo = serie.at(-1);
+  const agora = d.fase === "apurando" && ultimo.pct_secoes < 100;
+  const M = { t: agora ? 26 : 10, r: 14, b: 44, l: 42 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
   // Eixo simétrico em torno de 50%: as linhas dos dois candidatos são espelhos uma da outra.
-  const ultimo = serie.at(-1);
   let desvio = 3;
   for (const v of [...serie.filter((q) => q.pct_secoes >= d.projecao_desde_pct).map((q) => q.apurado), ultimo.projecao?.baixo, ultimo.projecao?.alto]) {
     if (v != null) desvio = Math.max(desvio, Math.abs(v - 50));
@@ -357,7 +358,7 @@ function desenharGrafico() {
   const X = (p) => M.l + (p / 100) * iw;
   const Y = (v) => M.t + ((hi - v) / (hi - lo)) * ih;
 
-  const passo = passoNice(hi - lo, 5);
+  const passo = passoNice(hi - lo, 3);
   const ticksY = [];
   for (let k = -Math.floor(desvio / passo + 1e-9); k <= Math.floor(desvio / passo + 1e-9); k++) ticksY.push(Math.round((50 + k * passo) * 100) / 100);
 
@@ -371,12 +372,20 @@ function desenharGrafico() {
 
   const y50 = Y(50);
 
+  if (agora) {
+    svg.append(
+      sv("rect", { class: "futuro", x: X(ultimo.pct_secoes), y: M.t, width: X(100) - X(ultimo.pct_secoes), height: ih }),
+      sv("line", { class: "agora", x1: X(ultimo.pct_secoes), x2: X(ultimo.pct_secoes), y1: M.t - 4, y2: M.t + ih }),
+    );
+    const rotAgora = sv("text", { x: X(ultimo.pct_secoes), y: M.t - 10, "text-anchor": "middle" });
+    rotAgora.textContent = "Agora";
+    svg.append(rotAgora);
+  }
   for (const v of ticksY) {
     if (v === 50) continue;
     svg.append(sv("line", { class: "grade", x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v) }));
   }
   for (const p of [0, 25, 50, 75, 100]) {
-    svg.append(sv("line", { class: "grade", x1: X(p), x2: X(p), y1: M.t, y2: M.t + ih }));
     const t = sv("text", { x: X(p), y: M.t + ih + 16, "text-anchor": p === 0 ? "start" : p === 100 ? "end" : "middle" });
     t.textContent = `${p}%`;
     svg.append(t);
@@ -387,7 +396,7 @@ function desenharGrafico() {
     svg.append(t);
   }
   const titulo = sv("text", { x: M.l + iw / 2, y: H - 6, "text-anchor": "middle" });
-  titulo.textContent = "% das seções apuradas";
+  titulo.textContent = "Seções apuradas";
   svg.append(
     sv("line", { class: "eixo", x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih }),
     sv("line", { class: "ref50", x1: M.l, x2: M.l + iw, y1: y50, y2: y50 }),
@@ -547,7 +556,7 @@ function desenharTabelaSerie() {
   corpo.replaceChildren(el("table", {},
     el("caption", { class: "vh", text: `Evolução da contagem e da projeção, em % de ${nm.esq} nos votos válidos` }),
     el("thead", {}, el("tr", {},
-      ...["Hora", "% das seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
+      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
     el("tbody", {}, linhas)));
 }
 
@@ -626,7 +635,7 @@ function detalheUf(u, nm) {
 
 const COLUNAS = [
   { chave: "nome", rot: () => "Estado", valor: (u) => u.nome },
-  { chave: "pct_secoes", rot: () => "% das seções apuradas", valor: (u) => u.pct_secoes },
+  { chave: "pct_secoes", rot: () => "Seções apuradas", valor: (u) => u.pct_secoes },
   { chave: "apurado", rot: (nm) => `Contagem (${nm.esq} %)`, valor: (u) => u.apurado },
   { chave: "projecao", rot: (nm) => `Projeção (${nm.esq} %)`, valor: (u) => u.projecao?.centro },
   { chave: "faixa", rot: () => "Faixa da projeção", valor: (u) => u.projecao?.baixo },

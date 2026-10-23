@@ -244,12 +244,14 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .grafico text { font-family: inherit; font-size: 11px; fill: var(--ink-3); font-variant-numeric: tabular-nums; }
 .grafico .grade { stroke: var(--line); stroke-width: 1; }
 .grafico .eixo { stroke: var(--axis); stroke-width: 1; }
-.grafico .ref50 { stroke: var(--ink-2); stroke-width: 1.5; }
+.grafico .ref50 { stroke: var(--axis); stroke-width: 1; }
+.grafico .futuro { fill: var(--wash); }
+.grafico .agora { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
 .cor-esq { --cor: var(--esq); }
 .cor-dir { --cor: var(--dir); }
 .grafico .faixa-area { fill: var(--cor); fill-opacity: 0.16; }
 .grafico .linha-bruta { fill: none; stroke: var(--cor); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
-.grafico .linha-proj { fill: none; stroke: var(--cor); stroke-width: 2.5; stroke-dasharray: 0.1 5; stroke-linecap: round; }
+.grafico .linha-proj { fill: none; stroke: var(--cor); stroke-width: 2; stroke-dasharray: 5 4; stroke-linecap: butt; }
 .grafico .ponto-proj { fill: var(--cor); stroke: var(--surf); stroke-width: 2; }
 .grafico .ponto-bruto { fill: var(--surf); stroke: var(--cor); stroke-width: 2.5; }
 .grafico .mira { stroke: var(--ink-3); stroke-width: 1; }
