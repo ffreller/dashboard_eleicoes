@@ -43,7 +43,7 @@ def _ponto(momento: datetime, r: Recorte) -> dict:
         "pct_aptos": round(r.pct_aptos, 2),
         "apurado": None if r.apurado is None else round(r.apurado, 2),
         "votos_validos": r.votos_validos,
-        "projecao": _faixa(r.projecao),
+        "projecao": _faixa(r.projecao) if r.pct_secoes >= PROJECAO_DESDE_PCT else None,
     }
 
 

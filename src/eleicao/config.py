@@ -23,6 +23,12 @@ REGIAO = {
     "zz": "EX",
 }
 
+CAPITAIS = frozenset({
+    1392, 27855, 6050, 2550, 38490, 13897, 97012, 57053, 93734, 9210, 90670, 90514, 41238, 75353,
+    20516, 4278, 25313, 12190, 60011, 17612, 88013, 35, 3018, 81051, 31054, 71072, 73440,
+})
+"""Códigos TSE dos municípios das capitais (campo "c" de mun-e006258-cm.json)."""
+
 
 @dataclass(frozen=True)
 class Candidato:
