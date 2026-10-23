@@ -68,7 +68,7 @@ class Eleicao:
     esquerda: Candidato
     direita: Candidato
     numeros_b: tuple[int, int]
-    divulgacao: Divulgacao | None
+    divulgacao: Divulgacao
 
 
 ELEICOES = {
@@ -80,13 +80,14 @@ ELEICOES = {
         numeros_b=(13, 22),
         divulgacao=Divulgacao(ciclo="ele2026", eleicao=6258, pleito=3221),
     ),
-    # Ensaio: o 2º turno de 2022 reproduzido na ordem real de chegada dos boletins.
+    # Ensaio: o 2º turno de 2022 reproduzido na ordem real de chegada dos boletins. O TSE não serve
+    # mais esses arquivos; os códigos reais servem ao TSE falso (eleicao.tse.falso).
     2022: Eleicao(
         ano=2022,
         ano_b=2018,
         esquerda=Candidato("lula", "Lula", 13, "PT"),
         direita=Candidato("bolsonaro", "Jair Bolsonaro", 22, "PL"),
         numeros_b=(13, 17),
-        divulgacao=None,
+        divulgacao=Divulgacao(ciclo="ele2022", eleicao=545, pleito=407),
     ),
 }

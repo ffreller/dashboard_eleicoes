@@ -116,10 +116,10 @@ class Base:
 class Apuracao:
     """O que já foi totalizado num instante, na ordem da `Base`.
 
-    `totalizada` diz quais seções já entraram na conta. Os demais campos são por município (ordem de
-    `Base.municipios`) e somam só as seções totalizadas, como o arquivo de resultado do município.
-    Quando o arquivo de seções e o de resultado não batem, quem monta a `Apuracao` reconcilia (o modelo
-    confia nos totais por município e usa `totalizada` só para saber quais seções faltam).
+    `totalizada` vem do arquivo de seções (seção com horário = totalizada). Os demais campos são por
+    município (ordem de `Base.municipios`) e copiam o arquivo de resultado do município: votos, e
+    `aptos` e `secoes` das seções totalizadas. Os dois arquivos são gerados em momentos diferentes e
+    podem divergir; quem monta a `Apuracao` reporta os dois como vieram e o modelo reconcilia.
     """
 
     momento: datetime
