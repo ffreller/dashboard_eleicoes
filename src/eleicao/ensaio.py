@@ -80,13 +80,14 @@ def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Bas
         cobre_uf = [r.projecao.baixo - 0.005 <= final_uf[u] <= r.projecao.alto + 0.005 for u, r in abertas.items()]
         linhas.append({
             "ordem": ordem, "pct_secoes": b.pct_secoes, "apurado": b.apurado, "final": final,
-            "centro": f and f.centro, "baixo": f and f.baixo, "alto": f and f.alto,
+            "centro": f and f.centro, "baixo": f and f.baixo, "alto": f and f.alto, "chance": f and f.chance,
             "erro_uf_medio": float(np.mean(erro_uf)) if erro_uf else None,
             "cobertura_uf": float(np.mean(cobre_uf)) if cobre_uf else None,
         })
     df = pl.DataFrame(linhas).with_columns(
         (pl.col("centro") - pl.col("final")).alias("erro"),
         ((pl.col("baixo") <= pl.col("final")) & (pl.col("final") <= pl.col("alto"))).alias("cobre"),
+        pl.when(pl.col("final") > 50).then(100 - pl.col("chance")).otherwise(pl.col("chance")).alias("chance_perdedor"),
     )
     return df
 
@@ -99,6 +100,7 @@ def resumo(df: pl.DataFrame, desde_pct: float = 5.0) -> dict:
         "erro_max_pp": round(float(d["erro"].abs().max()), 3),
         "cobertura_faixa": round(float(d["cobre"].mean()), 3),
         "erro_medio_apurado_pp": round(float((d["apurado"] - d["final"]).abs().mean()), 3),
+        "chance_max_de_quem_perdeu": round(float(df.filter(pl.col("pct_secoes") >= 1)["chance_perdedor"].max()), 1),
     }
 
 
