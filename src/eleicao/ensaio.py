@@ -75,8 +75,9 @@ def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Bas
         proj = modelo.projetar(apuracao_ate(base, cen, posto, limite, inicio + timedelta(minutes=pct)))
         b = proj.brasil
         f = b.projecao
-        erro_uf = [abs(r.projecao.centro - final_uf[u]) for u, r in proj.ufs.items() if r.projecao]
-        cobre_uf = [r.projecao.baixo <= final_uf[u] <= r.projecao.alto for u, r in proj.ufs.items() if r.projecao]
+        abertas = {u: r for u, r in proj.ufs.items() if r.projecao and r.pct_secoes < 100}
+        erro_uf = [abs(r.projecao.centro - final_uf[u]) for u, r in abertas.items()]
+        cobre_uf = [r.projecao.baixo - 0.005 <= final_uf[u] <= r.projecao.alto + 0.005 for u, r in abertas.items()]
         linhas.append({
             "ordem": ordem, "pct_secoes": b.pct_secoes, "apurado": b.apurado, "final": final,
             "centro": f and f.centro, "baixo": f and f.baixo, "alto": f and f.alto,

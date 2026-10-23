@@ -103,7 +103,10 @@ class Saida:
         if projecao is not None:
             ponto = _ponto(projecao.momento, projecao.brasil)
             ultimo = self.serie[-1] if self.serie else None
-            if ultimo is None or (ultimo["pct_secoes"], ultimo["apurado"]) != (ponto["pct_secoes"], ponto["apurado"]):
+            # Um ciclo parcial (por exemplo, logo depois de reiniciar) pode ver menos do que o já gravado.
+            if ultimo is not None and ponto["pct_secoes"] < ultimo["pct_secoes"]:
+                pass
+            elif ultimo is None or (ultimo["pct_secoes"], ultimo["apurado"]) != (ponto["pct_secoes"], ponto["apurado"]):
                 self.serie.append(ponto)
             elif ultimo != ponto:
                 self.serie[-1] = ponto
@@ -114,7 +117,7 @@ class Saida:
                     "nome": NOMES_UF[uf],
                     "pct_secoes": round(r.pct_secoes, 2),
                     "apurado": None if r.apurado is None else round(r.apurado, 2),
-                    "projecao": _faixa(r.projecao),
+                    "projecao": _faixa(r.projecao) if min(r.pct_secoes, projecao.brasil.pct_secoes) >= PROJECAO_DESDE_PCT else None,
                     "primeiro_turno": round(primeiro, 2),
                     "segundo_turno_anterior": round(anterior, 2),
                 })
@@ -136,5 +139,5 @@ class Saida:
         }
         self.caminho.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.caminho.with_suffix(".tmp")
-        tmp.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        tmp.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
         os.replace(tmp, self.caminho)

@@ -9,8 +9,9 @@ falta recebe a referência dela mais a mudança prevista para o seu perfil, mais
 município (encolhido conforme quanto dele já foi apurado). O total de votos válidos de cada seção que falta
 é o do 1º turno vezes a razão 2º/1º turno medida no município (encolhida para a da UF).
 
-A faixa vem de sorteios: coeficientes da distribuição a posteriori da regressão, desvios de município e
-razões de votos válidos. A largura é multiplicada por `calibracao`, ajustada no ensaio de 2022.
+A faixa vem de sorteios: coeficientes da distribuição a posteriori da regressão, desvios de município,
+razões de votos válidos (por município e por UF) e choques comuns sobre tudo o que falta. Os sorteios usam
+uma semente derivada da própria apuração, para que os mesmos dados deem sempre a mesma faixa.
 """
 
 from dataclasses import dataclass
@@ -35,21 +36,23 @@ class Parametros:
     sd_coef: tuple[float, ...] = (0.5, 0.1, 0.1, 1.0, 0.05, 0.02, 0.3, 0.5)
     """Desvio a priori de cada coeficiente do perfil (mesma ordem das colunas de `Modelo.perfil`)."""
     sd_nacional: float = 0.3
-    sd_regiao: float = 0.04
-    sd_uf: float = 0.03
+    sd_regiao: float = 0.08
+    sd_uf: float = 0.08
     sd_municipio: float = 0.024
-    """Pisos dos desvios de região, UF e município em relação ao previsto; a apuração pode aumentá-los."""
+    """Pisos dos desvios de região, UF e município em relação ao previsto; a apuração pode aumentá-los.
+    Região e UF: entre a dispersão medida no 2º turno de 2022 (0,016 e 0,019) e no de 2018 (0,076 e
+    0,099), porque um bloco que chega inteiro por último só tem a priori para se apoiar."""
     sobredispersao: float = 3.0
     """Multiplica a variância binomial do swing medido em poucas seções."""
     peso_validos: float = 5000.0
     """Votos com que a razão de válidos da UF entra na estimativa de cada município."""
     sd_validos: float = 0.018
+    sd_validos_uf: float = 0.02
     sd_ordem_nacional: float = 0.015
     sd_ordem_uf: float = 0.02
     """Choques comuns no swing de tudo o que falta (no Brasil e em cada UF): o risco de as seções que
     chegam por último mudarem de voto de um jeito que as primeiras não mostram."""
-    sorteios: int = 200
-    calibracao: float = 1.0
+    sorteios: int = 300
     nivel: float = 0.95
 
 
@@ -59,10 +62,9 @@ NOMES_PERFIL = (
 
 
 class Modelo:
-    def __init__(self, base: Base, parametros: Parametros = Parametros(), semente: int = 0):
+    def __init__(self, base: Base, parametros: Parametros = Parametros()):
         self.base = base
         self.par = parametros
-        self.rng = np.random.default_rng(semente)
         s = base.secoes
         nm = base.n_municipios
         mi = base.mun_idx
@@ -125,8 +127,7 @@ class Modelo:
         def com_faixa(r: Recorte, c: float, amostra: np.ndarray) -> Recorte:
             q = (1 - self.par.nivel) / 2
             lo, hi = np.quantile(amostra, [q, 1 - q])
-            k = self.par.calibracao
-            f = Faixa(centro=c, baixo=c - k * max(c - lo, 0.0), alto=c + k * max(hi - c, 0.0))
+            f = Faixa(centro=c, baixo=min(lo, c), alto=max(hi, c))
             return Recorte(r.pct_secoes, r.pct_aptos, r.apurado, r.votos_validos, f)
 
         brasil = com_faixa(brasil, centro[0], sorteios[:, 0])
@@ -185,7 +186,9 @@ class Modelo:
         cont = ap.totalizada.astype(bool)
         est = ap.aptos.astype(float)
         aptos_c = np.bincount(mi, self.aptos * cont, nm)
-        resto = np.maximum(self.aptos_mun - est, 0.0)
+        # O eleitorado do 2º turno pode ser menor que o do 1º; município completo no resultado não tem resto.
+        completo = ap.secoes >= np.bincount(mi, minlength=nm)
+        resto = np.where(completo, 0.0, np.maximum(self.aptos_mun - est, 0.0))
         aptos_nc = self.aptos_mun - aptos_c
 
         # Reconciliação: as seções marcadas no arquivo de seções valem pelo eleitorado que o arquivo de
@@ -230,6 +233,7 @@ class Modelo:
         uf_lk = (uf_lk_num + par.peso_validos * nac_lk) / (uf_lk_den + par.peso_validos)
         k_mun = (peso_lk * lk + par.peso_validos * uf_lk[self.uf_idx]) / (peso_lk + par.peso_validos)
         sd_lk = par.sd_validos * np.sqrt(par.peso_validos / (peso_lk + par.peso_validos))
+        sd_lk_uf = par.sd_validos_uf * np.sqrt(par.peso_validos / (uf_lk_den + par.peso_validos))
 
         falta = np.flatnonzero(peso_n > 0)
         mf = mi[falta]
@@ -252,12 +256,13 @@ class Modelo:
 
         centro = total(theta, desvio, k_mun)
         chol = np.linalg.cholesky(cov)
+        rng = np.random.default_rng([int(ap.secoes.sum()), int(e_obs.sum()), int(d_obs.sum()), int(cont.sum())])
         amostras = np.empty((par.sorteios, 1 + self.n_uf))
         for j in range(par.sorteios):
-            theta_s = theta + chol @ self.rng.standard_normal(len(theta))
-            choque = par.sd_ordem_nacional * self.rng.standard_normal() + par.sd_ordem_uf * self.rng.standard_normal(self.n_uf)
-            desvio_s = desvio + np.sqrt(var_desvio) * self.rng.standard_normal(nm) + choque[self.uf_idx]
-            lk_s = k_mun + sd_lk * self.rng.standard_normal(nm)
+            theta_s = theta + chol @ rng.standard_normal(len(theta))
+            choque = par.sd_ordem_nacional * rng.standard_normal() + par.sd_ordem_uf * rng.standard_normal(self.n_uf)
+            desvio_s = desvio + np.sqrt(var_desvio) * rng.standard_normal(nm) + choque[self.uf_idx]
+            lk_s = k_mun + sd_lk * rng.standard_normal(nm) + (sd_lk_uf * rng.standard_normal(self.n_uf))[self.uf_idx]
             amostras[j] = total(theta_s, desvio_s, lk_s)
         return centro, amostras, Previsao(falta, *secao(theta, desvio, k_mun))
 

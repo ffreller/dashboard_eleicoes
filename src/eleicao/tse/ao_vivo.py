@@ -89,7 +89,7 @@ def fase_da_contagem(ap: Apuracao, estado: Estado) -> Fase:
     A segunda via existe porque o arquivo de seções pode deixar sem hora seções que o TSE já contou:
     no 1º turno, 41 seções do exterior ficaram assim e `st == ts` mesmo assim.
     """
-    if not ap.totalizada.any():
+    if not ap.totalizada.any() and not ap.secoes.any():
         return "aguardando"
     linhas = [a for uf in estado.andamento.values() for a in uf.values()]
     completo = (

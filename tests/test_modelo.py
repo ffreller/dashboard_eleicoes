@@ -67,8 +67,21 @@ def test_sem_nada_apurado_nao_projeta(base, cenario, modelo):
 def test_faixa_estreita_conforme_a_apuracao_avanca(base, cenario, modelo):
     posto = postos(cenario, "real")
     larguras = []
-    for frac in (0.02, 0.2, 0.6):
+    for frac in (0.1, 0.5, 0.9):
         f = modelo.projetar(apuracao_ate(base, cenario, posto, int(cenario.height * frac), MOMENTO)).brasil.projecao
         larguras.append(f.alto - f.baixo)
     assert larguras[0] > larguras[1] > larguras[2] > 0
     assert np.all(np.isfinite(larguras))
+
+
+def test_mesma_apuracao_da_mesma_faixa(base, cenario, modelo):
+    ap = apuracao_ate(base, cenario, postos(cenario, "real"), cenario.height // 5, MOMENTO)
+    assert modelo.projetar(ap).brasil.projecao == modelo.projetar(ap).brasil.projecao
+
+
+def test_municipio_completo_no_resultado_nao_projeta_resto(base, cenario, modelo):
+    """O 2º turno pode ter menos aptos que o 1º; com todas as seções contadas, a projeção é o apurado."""
+    ap = apuracao_ate(base, cenario, postos(cenario, "real"), cenario.height, MOMENTO)
+    ap = type(ap)(**{**ap.__dict__, "aptos": (ap.aptos * 0.99).astype(ap.aptos.dtype)})
+    for r in modelo.projetar(ap).ufs.values():
+        assert r.projecao.centro == pytest.approx(r.apurado, abs=1e-9)

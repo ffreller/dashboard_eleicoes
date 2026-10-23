@@ -107,3 +107,18 @@ def test_resultado_atrasado_e_relido_ate_alcancar_as_secoes(mundo):
     falso.falhas = None
     [montagem] = asyncio.run(rodar_ciclos(falso.url_base, base, Estado(), 1))
     assert montagem.apuracao.secoes.sum() == montagem.apuracao.totalizada.sum()
+
+
+def test_fase_apurando_com_resultados_mesmo_sem_arquivo_de_secoes():
+    """Se nenhum arquivo de seções carregou (429 depois de reiniciar), votos já contados não podem virar 'aguardando'."""
+    from datetime import datetime
+
+    import numpy as np
+
+    from eleicao.tipos import Apuracao
+    from eleicao.tse.ao_vivo import fase_da_contagem
+    from eleicao.tse.apuracao import Estado
+
+    um = np.array([10])
+    ap = Apuracao(datetime(2026, 10, 25, 18), np.zeros(3, bool), um, um, um, um, um, um, np.array([2]))
+    assert fase_da_contagem(ap, Estado()) == "apurando"
