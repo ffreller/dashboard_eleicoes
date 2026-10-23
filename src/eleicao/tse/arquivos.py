@@ -41,10 +41,6 @@ class Secoes:
     def n_totalizadas(self) -> int:
         return int(np.count_nonzero(~np.isnat(self.hora)))
 
-    @property
-    def completa(self) -> bool:
-        return self.n_totalizadas == len(self.secao)
-
 
 def ler_secoes(uf: str, dados: dict) -> Secoes:
     """Seções com `nsp` são agregadas à seção principal: não têm hora própria e ficam de fora."""

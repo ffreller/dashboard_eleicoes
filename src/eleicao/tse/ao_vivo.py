@@ -12,13 +12,12 @@ from pathlib import Path
 from typing import Protocol
 from zoneinfo import ZoneInfo
 
-
 from eleicao import config
 from eleicao.config import UFS, Divulgacao, Eleicao
 from eleicao.saida import Fase, Saida
 from eleicao.tipos import Apuracao, Base, Projecao
 from eleicao.tse.apuracao import Estado, Montagem, montar
-from eleicao.tse.arquivos import ArquivoInesperado, Andamento, ler_andamento, ler_resultado, ler_secoes
+from eleicao.tse.arquivos import Andamento, ArquivoInesperado, ler_andamento, ler_resultado, ler_secoes
 from eleicao.tse.cliente import Baixa, Cliente, Medidas
 
 log = logging.getLogger("eleicao.tse")
@@ -85,11 +84,20 @@ async def ciclo(cliente: Cliente, div: Divulgacao, eleicao: Eleicao, estado: Est
 
 
 def fase_da_contagem(ap: Apuracao, estado: Estado) -> Fase:
-    """Encerrada quando toda seção da Base foi totalizada ou quando o TSE diz que não falta nenhuma."""
+    """Encerrada quando toda seção da Base tem hora ou quando andamento e resultados dizem 100%.
+
+    A segunda via existe porque o arquivo de seções pode deixar sem hora seções que o TSE já contou:
+    no 1º turno, 41 seções do exterior ficaram assim e `st == ts` mesmo assim.
+    """
     if not ap.totalizada.any():
         return "aguardando"
-    tse_completo = len(estado.secoes) == len(UFS) and all(s.completa for s in estado.secoes.values())
-    return "encerrada" if ap.totalizada.all() or tse_completo else "apurando"
+    linhas = [a for uf in estado.andamento.values() for a in uf.values()]
+    completo = (
+        len(estado.andamento) == len(UFS)
+        and all(a.secoes_totalizadas == a.secoes_total for a in linhas)
+        and ap.secoes.sum() == sum(a.secoes_total for a in linhas)
+    )
+    return "encerrada" if ap.totalizada.all() or completo else "apurando"
 
 
 def _linha(ap: Apuracao, fase: Fase, m: Medidas, resumo: Resumo, montagem: Montagem, segundos: float) -> str:
@@ -116,13 +124,16 @@ def rodar(
     destino: Path | None = None,
     ciclos: int | None = None,
     modelo: Callable[[Base], Projetor] | None = None,
+    por_segundo: float = 100.0,
 ) -> None:
     """`pasta` e `destino` trocam a Base e o JSON da página; `ciclos` limita as repetições (None é sem fim).
 
-    `modelo` constrói o projetor a partir da Base; por padrão `eleicao.modelo.Modelo`.
+    `modelo` constrói o projetor a partir da Base; por padrão `eleicao.modelo.Modelo`. `por_segundo` limita as
+    requisições à origem.
     """
     if not logging.getLogger().handlers:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     eleicao = config.ELEICOES[ano]
     div = eleicao.divulgacao if url_base is None else dataclasses.replace(eleicao.divulgacao, url_base=url_base)
     base = Base.ler(pasta or config.BASES / str(ano))
@@ -130,17 +141,18 @@ def rodar(
         from eleicao.modelo import Modelo as modelo
     saida = Saida(eleicao, base, destino or config.SITE / "dados" / "projecao.json")
     try:
-        asyncio.run(_laco(eleicao, div, base, modelo(base), saida, intervalo, ciclos))
+        asyncio.run(_laco(eleicao, div, base, modelo(base), saida, intervalo, ciclos, por_segundo))
     except KeyboardInterrupt:
         log.info("encerrado")
 
 
 async def _laco(
-    eleicao: Eleicao, div: Divulgacao, base: Base, modelo: Projetor, saida: Saida, intervalo: float, ciclos: int | None
+    eleicao: Eleicao, div: Divulgacao, base: Base, modelo: Projetor, saida: Saida, intervalo: float,
+    ciclos: int | None, por_segundo: float,
 ) -> None:
     estado = Estado()
     feitos = 0
-    async with Cliente() as cliente:
+    async with Cliente(por_segundo=por_segundo) as cliente:
         while True:
             inicio = time.monotonic()
             agora = datetime.now(BRASILIA).replace(tzinfo=None)
