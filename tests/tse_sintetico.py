@@ -10,7 +10,14 @@ import polars as pl
 
 from eleicao import config
 from eleicao.modelo import recortes_apurados
-from eleicao.tipos import COLUNAS_BASE, COLUNAS_CENARIO, COLUNAS_MUNICIPIOS, Apuracao, Base, Projecao
+from eleicao.tipos import (
+    COLUNAS_BASE,
+    COLUNAS_CENARIO,
+    COLUNAS_MUNICIPIOS,
+    Apuracao,
+    Base,
+    Projecao,
+)
 from eleicao.tse.ao_vivo import ciclo
 from eleicao.tse.apuracao import Estado, montar
 from eleicao.tse.cliente import Cliente

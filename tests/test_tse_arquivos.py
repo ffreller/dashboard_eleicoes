@@ -5,7 +5,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from eleicao.tse.arquivos import ArquivoInesperado, ler_andamento, ler_resultado, ler_secoes
+from eleicao.tse.arquivos import (
+    ArquivoInesperado,
+    ler_andamento,
+    ler_resultado,
+    ler_secoes,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures" / "tse"
 ESQ, DIR = 13, 22

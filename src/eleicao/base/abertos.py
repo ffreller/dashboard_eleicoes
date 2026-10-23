@@ -104,6 +104,24 @@ def votacao(ano: int) -> pl.DataFrame:
     return _parquet(f"votacao_{ano}", z, f"votacao_secao_{ano}_BR.csv", _VOTACAO)
 
 
+def votos_por_secao(ano: int, turno: int, esq: int, dir: int) -> pl.DataFrame:
+    """Votos de `esq`, de `dir` e dos demais candidatos (`outros`, sem branco e nulo), por seção, mais o local de votação."""
+    nominal = ~pl.col("numero").is_in([95, 96, 97])
+    return (
+        votacao(ano)
+        .filter(pl.col("turno") == turno)
+        .group_by(CHAVE)
+        .agg(
+            pl.col("votos").filter(pl.col("numero") == esq).sum().alias("esq"),
+            pl.col("votos").filter(pl.col("numero") == dir).sum().alias("dir"),
+            pl.col("votos").filter(nominal & ~pl.col("numero").is_in([esq, dir])).sum().alias("outros"),
+            pl.col("local").first(),
+            pl.col("nm_local").first(),
+            pl.col("endereco").first(),
+        )
+    )
+
+
 def detalhe(ano: int) -> pl.DataFrame:
     """Aptos, comparecimento, brancos, nulos, local de votação e hora de totalização por seção."""
     z = _zip(f"detalhe_votacao_secao_{ano}.zip", f"{CDN}/detalhe_votacao_secao/detalhe_votacao_secao_{ano}.zip")

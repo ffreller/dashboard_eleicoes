@@ -12,7 +12,7 @@ import math
 import numpy as np
 import polars as pl
 
-from eleicao.base.abertos import CHAVE, detalhe, votacao
+from eleicao.base.abertos import CHAVE, detalhe, votos_por_secao
 from eleicao.config import DADOS, SITE
 
 GRADE = [round(float(p), 1) for p in np.arange(0.1, 2.01, 0.1)] + [float(p) for p in np.arange(2.5, 100.01, 0.5)]
@@ -20,15 +20,7 @@ CONTROLE = (1, 10, 50, 90, 100)
 
 
 def votos_1t2026() -> pl.DataFrame:
-    agg = (
-        votacao(2026)
-        .filter(pl.col("turno") == 1)
-        .group_by(CHAVE)
-        .agg(
-            pl.col("votos").filter(pl.col("numero") == 13).sum().alias("esq"),
-            pl.col("votos").filter(pl.col("numero") == 22).sum().alias("dir"),
-        )
-    )
+    agg = votos_por_secao(2026, 1, 13, 22).select(CHAVE + ["esq", "dir"])
     d = detalhe(2026).filter(pl.col("turno") == 1).select(CHAVE + ["hora"])
     return d.join(agg, on=CHAVE, how="left").with_columns(pl.col("esq", "dir").fill_null(0))
 
@@ -51,5 +43,5 @@ curvas = [
 ]
 (SITE / "dados" / "referencias.json").write_text(json.dumps({"curvas": curvas}, ensure_ascii=False, separators=(",", ":")))
 for c in curvas:
-    por_p = {p: m for p, m in c["pontos"]}
+    por_p = dict(c["pontos"])
     print(c["id"], {p: por_p[float(p)] for p in CONTROLE})

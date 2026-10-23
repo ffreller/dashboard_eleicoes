@@ -17,7 +17,13 @@ from eleicao.config import UFS, Divulgacao, Eleicao
 from eleicao.saida import Fase, Saida, ler_validacao
 from eleicao.tipos import Apuracao, Base, Projecao
 from eleicao.tse.apuracao import Estado, Montagem, montar
-from eleicao.tse.arquivos import Andamento, ArquivoInesperado, ler_andamento, ler_resultado, ler_secoes
+from eleicao.tse.arquivos import (
+    Andamento,
+    ArquivoInesperado,
+    ler_andamento,
+    ler_resultado,
+    ler_secoes,
+)
 from eleicao.tse.cliente import Baixa, Cliente, Medidas
 
 log = logging.getLogger("eleicao.tse")

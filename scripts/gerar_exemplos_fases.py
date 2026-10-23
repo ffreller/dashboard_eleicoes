@@ -6,9 +6,9 @@ Rode da raiz do repositório: uv run python scripts/gerar_exemplos_fases.py
 
 import copy
 import json
-import math
 from datetime import datetime, timedelta
 from pathlib import Path
+from statistics import NormalDist
 
 DADOS = Path("site/dados")
 base = json.loads((DADOS / "exemplo.json").read_text(encoding="utf-8"))
@@ -22,7 +22,7 @@ def gravar(nome: str, doc: dict) -> None:
 def faixa(centro: float, baixo: float, alto: float) -> dict:
     """Faixa com a chance da esquerda passar de 50%, supondo a faixa de 95% normal."""
     sd = (alto - baixo) / (2 * 1.96)
-    chance = (100.0 if centro > 50 else 0.0) if sd == 0 else 100 * 0.5 * (1 + math.erf((centro - 50) / sd / math.sqrt(2)))
+    chance = (100.0 if centro > 50 else 0.0) if sd == 0 else 100 * NormalDist(0, sd).cdf(centro - 50)
     return {"centro": round(centro, 2), "baixo": round(baixo, 2), "alto": round(alto, 2), "chance": round(chance, 1)}
 
 

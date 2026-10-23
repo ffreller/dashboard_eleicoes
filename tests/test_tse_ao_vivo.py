@@ -6,7 +6,14 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-from tse_sintetico import ABERTURA, ModeloApurado, esperado, gravar_sintetico, rodar_ciclos, somas
+from tse_sintetico import (
+    ABERTURA,
+    ModeloApurado,
+    esperado,
+    gravar_sintetico,
+    rodar_ciclos,
+    somas,
+)
 
 from eleicao import config
 from eleicao.tipos import Base

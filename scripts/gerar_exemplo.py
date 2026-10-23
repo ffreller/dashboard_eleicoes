@@ -4,16 +4,11 @@ import json
 import math
 import random
 from datetime import datetime, timedelta, timezone
+from statistics import NormalDist
+
+from eleicao.config import NOMES_UF
 
 BRT = timezone(timedelta(hours=-3))
-UFS = {
-    "AC": "Acre", "AL": "Alagoas", "AM": "Amazonas", "AP": "Amapá", "BA": "Bahia", "CE": "Ceará",
-    "DF": "Distrito Federal", "ES": "Espírito Santo", "GO": "Goiás", "MA": "Maranhão", "MG": "Minas Gerais",
-    "MS": "Mato Grosso do Sul", "MT": "Mato Grosso", "PA": "Pará", "PB": "Paraíba", "PE": "Pernambuco",
-    "PI": "Piauí", "PR": "Paraná", "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte", "RO": "Rondônia",
-    "RR": "Roraima", "RS": "Rio Grande do Sul", "SC": "Santa Catarina", "SE": "Sergipe", "SP": "São Paulo",
-    "TO": "Tocantins", "ZZ": "Exterior",
-}
 PRIMEIRO = {
     "AC": 30, "AL": 58, "AM": 47, "AP": 45, "BA": 70, "CE": 66, "DF": 38, "ES": 40, "GO": 35, "MA": 69,
     "MG": 48, "MS": 36, "MT": 33, "PA": 53, "PB": 65, "PE": 65, "PI": 74, "PR": 35, "RJ": 42, "RN": 63,
@@ -32,7 +27,7 @@ for k in range(80):
     proj = None
     if pct >= 1:
         c = final + random.uniform(-0.25, 0.25) * largura
-        chance = 100 * 0.5 * (1 + math.erf((c - 50) / (largura / 1.96) / math.sqrt(2)))
+        chance = 100 * NormalDist(0, largura / 1.96).cdf(c - 50)
         proj = {"centro": round(c, 2), "baixo": round(c - largura, 2), "alto": round(c + largura, 2), "chance": round(chance, 1)}
     serie.append({
         "hora": hora.isoformat(timespec="seconds"),
@@ -46,7 +41,8 @@ for k in range(80):
         break
 
 ufs = []
-for uf, nome in UFS.items():
+for sigla, nome in NOMES_UF.items():
+    uf = sigla.upper()
     pct = round(random.uniform(70, 100), 2)
     c = PRIMEIRO[uf] + random.uniform(-3, 3)
     w = 0.3 + 4 * (1 - pct / 100)
@@ -56,7 +52,7 @@ for uf, nome in UFS.items():
         "pct_secoes": pct,
         "apurado": round(c + random.uniform(-2, 2), 2),
         "projecao": {"centro": round(c, 2), "baixo": round(c - w, 2), "alto": round(c + w, 2),
-                     "chance": round(100 * 0.5 * (1 + math.erf((c - 50) / (w / 1.96) / math.sqrt(2))), 1)},
+                     "chance": round(100 * NormalDist(0, w / 1.96).cdf(c - 50), 1)},
         "primeiro_turno": float(PRIMEIRO[uf]),
         "segundo_turno_anterior": round(PRIMEIRO[uf] + random.uniform(-4, 4), 2),
     })

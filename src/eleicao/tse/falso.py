@@ -20,8 +20,7 @@ import numpy as np
 import polars as pl
 
 from eleicao import config
-from eleicao.config import UFS, Divulgacao
-from eleicao.saida import NOMES_UF
+from eleicao.config import NOMES_UF, UFS, Divulgacao
 from eleicao.tipos import COLUNAS_CENARIO, COLUNAS_MUNICIPIOS, conferir_colunas
 
 log = logging.getLogger("eleicao.tse")

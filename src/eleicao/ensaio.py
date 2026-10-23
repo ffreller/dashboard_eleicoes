@@ -6,17 +6,21 @@ seções que chegaram por último.
 """
 
 import json
+from collections.abc import Callable, Iterator
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import numpy as np
 import polars as pl
 
 from eleicao.base.abertos import CHAVE
-from eleicao.config import BASES, DADOS
+from eleicao.config import BASES, DADOS, ELEICOES
 from eleicao.modelo import Modelo, Parametros
-from eleicao.tipos import Apuracao, Base
+from eleicao.saida import Saida, ler_validacao
+from eleicao.tipos import Apuracao, Base, Projecao
 
 PONTOS_PCT = (0.25, 0.5, 1, 1.5, 2, 3, 4, 5, 7, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99)
+PONTOS_EXEMPLO = (0.1, 0.25, 0.5, 1, 1.5, 2, 3, 4, 5, 7, 10, 12.5, 15, 17.5, 20, 25, 30, 35, 40, 45, 50)
 ORDENS = ("real", "aleatoria", "invertida")
 
 
@@ -84,12 +88,11 @@ def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Bas
             "erro_uf_medio": float(np.mean(erro_uf)) if erro_uf else None,
             "cobertura_uf": float(np.mean(cobre_uf)) if cobre_uf else None,
         })
-    df = pl.DataFrame(linhas).with_columns(
+    return pl.DataFrame(linhas).with_columns(
         (pl.col("centro") - pl.col("final")).alias("erro"),
         ((pl.col("baixo") <= pl.col("final")) & (pl.col("final") <= pl.col("alto"))).alias("cobre"),
         pl.when(pl.col("final") > 50).then(100 - pl.col("chance")).otherwise(pl.col("chance")).alias("chance_perdedor"),
     )
-    return df
 
 
 def resumo(df: pl.DataFrame, desde_pct: float = 5.0) -> dict:
@@ -128,6 +131,27 @@ def ensaiar(ano: int) -> None:
     doc = {"eleicao": f"2º turno de {ano}", **resumo(real), "por_ordem": {o: resumo(tudo.filter(pl.col("ordem") == o)) for o in ORDENS}}
     (pasta / f"{ano}.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(doc, ensure_ascii=False))
+
+
+def gravar_exemplo(
+    base: Base, cen: pl.DataFrame, destino: Path, momento: Callable[[np.datetime64], datetime]
+) -> Iterator[tuple[float, datetime, Projecao]]:
+    """Grava em `destino` a apuração de 2026 de `cen` até `PONTOS_EXEMPLO`, na ordem real de chegada, marcada como exemplo.
+
+    Cada ponto passa pelo mesmo `Modelo` e pela mesma `Saida` do acompanhamento ao vivo. `momento` converte a hora
+    da última seção do ponto no instante gravado. Devolve cada ponto à medida que sai, para o chamador imprimir.
+    """
+    posto = postos(cen, "real")
+    horas = np.sort(cen["hora"].drop_nulls().to_numpy())
+    modelo = Modelo(base)
+    destino.unlink(missing_ok=True)
+    saida = Saida(ELEICOES[2026], base, destino, ler_validacao(DADOS / "ensaio"), exemplo=True)
+    for pct in PONTOS_EXEMPLO:
+        limite = int(np.ceil(cen.height * pct / 100))
+        instante = momento(horas[limite - 1])
+        proj = modelo.projetar(apuracao_ate(base, cen, posto, limite, instante))
+        saida.registrar(proj, "apurando", instante)
+        yield pct, instante, proj
 
 
 def cenario_sintetico(base: Base, swing: float, semente: int = 0) -> pl.DataFrame:

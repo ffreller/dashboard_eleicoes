@@ -15,19 +15,10 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from eleicao.config import Eleicao
+from eleicao.config import NOMES_UF, Eleicao
 from eleicao.tipos import Base, Faixa, Projecao, Recorte
 
 Fase = Literal["aguardando", "apurando", "encerrada"]
-
-NOMES_UF = {
-    "ac": "Acre", "al": "Alagoas", "am": "Amazonas", "ap": "Amapá", "ba": "Bahia", "ce": "Ceará",
-    "df": "Distrito Federal", "es": "Espírito Santo", "go": "Goiás", "ma": "Maranhão", "mg": "Minas Gerais",
-    "ms": "Mato Grosso do Sul", "mt": "Mato Grosso", "pa": "Pará", "pb": "Paraíba", "pe": "Pernambuco",
-    "pi": "Piauí", "pr": "Paraná", "rj": "Rio de Janeiro", "rn": "Rio Grande do Norte", "ro": "Rondônia",
-    "rr": "Roraima", "rs": "Rio Grande do Sul", "sc": "Santa Catarina", "se": "Sergipe", "sp": "São Paulo",
-    "to": "Tocantins", "zz": "Exterior",
-}
 
 BRASILIA = ZoneInfo("America/Sao_Paulo")
 
@@ -92,6 +83,8 @@ class Saida:
     validacao: dict | None = None
     tse_url: str | None = None
     """Arquivo nacional do TSE que a página lê sozinha para mostrar a contagem sem esperar a projeção."""
+    exemplo: bool = False
+    """Marca o arquivo como fictício ou simulado, para a página avisar."""
     serie: list[dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -142,6 +135,8 @@ class Saida:
             "validacao": self.validacao,
             "tse": self.tse_url,
         }
+        if self.exemplo:
+            doc["exemplo"] = True
         self.caminho.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.caminho.with_suffix(".tmp")
         tmp.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
