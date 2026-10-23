@@ -1,0 +1,33 @@
+{
+ "versao": 1,
+ "exemplo": true,
+ "eleicao": {
+  "ano": 2026,
+  "turno": 2,
+  "cargo": "Presidente"
+ },
+ "candidatos": {
+  "esq": {
+   "nome": "Lula",
+   "numero": 13,
+   "partido": "PT"
+  },
+  "dir": {
+   "nome": "Flávio Bolsonaro",
+   "numero": 22,
+   "partido": "PL"
+  }
+ },
+ "fase": "aguardando",
+ "atualizado": "2026-10-25T16:55:00-03:00",
+ "nivel_faixa": 95,
+ "projecao_desde_pct": 1.0,
+ "serie": [],
+ "ufs": [],
+ "validacao": {
+  "eleicao": "2º turno de 2022",
+  "erro_medio_pp": 0.2,
+  "desde_pct": 5.0,
+  "cobertura_faixa": 0.95
+ }
+}
