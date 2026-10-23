@@ -66,7 +66,7 @@ const estado = {
   bruto: "",
   falha: null,
   proximo: 0,
-  idx: null,
+  sel: null,
   uf: null,
   ord: { chave: "nome", dir: 1 },
 };
@@ -274,8 +274,7 @@ function segmentos(serie, pega) {
 
 let desenhoGrafico = null;
 
-function pontosDe(q) {
-  const v = q.apurado;
+function pontosDe(v) {
   return [
     ["ponto-bruto cor-esq", v],
     ["ponto-bruto cor-dir", v == null ? null : 100 - v],
@@ -396,41 +395,42 @@ function desenharGrafico() {
       if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(100), cy: Y(v), r: 5 }));
     }
   }
-  for (const [cls, v] of pontosDe(ultimo)) {
+  for (const [cls, v] of pontosDe(ultimo.apurado)) {
     if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(ultimo.pct_secoes), cy: Y(v), r: 4.5 }));
   }
 
   const mira = sv("g", { visibility: "hidden", "pointer-events": "none" },
     sv("line", { class: "mira", y1: M.t, y2: M.t + ih }),
-    ...pontosDe({}).map(([cls]) => sv("circle", { class: cls, r: 4.5 })),
+    ...pontosDe(null).map(([cls]) => sv("circle", { class: cls, r: 4.5 })),
   );
   svg.append(mira);
 
   const alvo = sv("rect", { x: M.l, y: M.t, width: iw, height: ih, fill: "transparent" });
   svg.append(alvo);
-  host.append(svg);
+  const dica = el("div", { class: "dica", hidden: true });
+  host.append(svg, dica);
 
-  const maisProximo = (clientX) => {
+  // Contagem até agora seguida do caminho projetado até 100%, ambos navegáveis pelo mouse e pelo teclado.
+  const pontos = [
+    ...serie.map((q) => ({ x: q.pct_secoes, v: q.apurado, q })),
+    ...caminho.slice(1).map((c) => ({ x: c.x, v: c.centro, c, final: ultimo.projecao })),
+  ];
+  desenhoGrafico = { X, Y, M, W, mira, dica, svg, pontos, lo, hi, nm, d };
+  const pctDe = (clientX) => {
     const r = svg.getBoundingClientRect();
-    const p = ((clientX - r.left) * (W / r.width) - M.l) / iw * 100;
-    let a = 0, b = serie.length - 1;
-    while (b - a > 1) {
-      const m = (a + b) >> 1;
-      if (serie[m].pct_secoes <= p) a = m; else b = m;
-    }
-    return Math.abs(serie[a].pct_secoes - p) <= Math.abs(serie[b].pct_secoes - p) ? a : b;
+    return ((clientX - r.left) * (W / r.width) - M.l) / iw * 100;
   };
-  desenhoGrafico = { X, Y, mira, serie, lo, hi };
-  const pos = (e) => definirIdx(maisProximo(e.clientX));
+  const pos = (e) => definirSel(pontos[indiceMaisProximo(pontos, pctDe(e.clientX))].x);
   alvo.addEventListener("pointerdown", pos);
   alvo.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse" || e.buttons || e.pointerType === "touch") pos(e); });
-  alvo.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") definirIdx(null); });
+  alvo.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") definirSel(null); });
   svg.addEventListener("keydown", (e) => {
-    const atual = estado.idx ?? serie.length - 1;
+    const atual = indiceMaisProximo(pontos, estado.sel ?? ultimo.pct_secoes);
     const passoTecla = { ArrowLeft: -1, ArrowRight: 1, PageDown: -10, PageUp: 10 }[e.key];
-    if (passoTecla) definirIdx(Math.min(serie.length - 1, Math.max(0, atual + passoTecla)));
-    else if (e.key === "Home") definirIdx(0);
-    else if (e.key === "End" || e.key === "Escape") definirIdx(null);
+    const ir = (i) => definirSel(pontos[Math.min(pontos.length - 1, Math.max(0, i))].x);
+    if (passoTecla) ir(atual + passoTecla);
+    else if (e.key === "Home") ir(0);
+    else if (e.key === "End" || e.key === "Escape") definirSel(null);
     else return;
     e.preventDefault();
   });
@@ -438,26 +438,70 @@ function desenharGrafico() {
   desenharMira();
 }
 
-function definirIdx(i) {
-  if (i === estado.idx) return;
-  estado.idx = i;
+function indiceMaisProximo(pontos, p) {
+  let a = 0, b = pontos.length - 1;
+  while (b - a > 1) {
+    const m = (a + b) >> 1;
+    if (pontos[m].x <= p) a = m; else b = m;
+  }
+  return Math.abs(pontos[a].x - p) <= Math.abs(pontos[b].x - p) ? a : b;
+}
+
+function definirSel(x) {
+  if (x === estado.sel) return;
+  estado.sel = x;
   desenharMira();
+}
+
+function conteudoDica(d, nm, p) {
+  const linha = (lado, ...vals) => [
+    el("span", { class: `dica-nome cor-${lado}` }, el("i", { class: "dica-cor" }), nm[lado]),
+    ...vals.map((v) => el("span", { text: v })),
+  ];
+  const f = (v) => (v == null ? "–" : pc(v));
+  const proj = p.final ?? p.q.projecao;
+  const comFinal = proj != null;
+  const tabela = el("div", { class: `dica-tab${comFinal ? " com-final" : ""}` },
+    el("span"),
+    el("span", { class: "dica-cab", text: p.final ? "Contagem estimada" : "Contagem" }),
+    comFinal ? el("span", { class: "dica-cab", text: "Final projetado" }) : null,
+    ...linha("esq", f(p.v), ...(comFinal ? [f(proj.centro)] : [])),
+    ...linha("dir", f(p.v == null ? null : 100 - p.v), ...(comFinal ? [f(100 - proj.centro)] : [])),
+  );
+  const faixa = p.final ? p.c : proj;
+  const chance = p.final ? null : chanceDe(d, p.q);
+  return [
+    el("strong", { text: `${pc(p.x, p.final ? 0 : 2)} das seções apuradas` }),
+    el("span", { class: "dica-sub", text: p.final ? "Projeção, se o ritmo atual se mantiver" : hm(p.q.hora) }),
+    tabela,
+    faixa ? el("span", { class: "dica-sub", text: `${p.final ? "Faixa da contagem" : "Faixa da projeção"} (${nm.esq}): ${n(faixa.baixo)} a ${n(faixa.alto)}` }) : null,
+    chance ? el("span", { class: "dica-sub", text: `Chance de vencer: ${nm.esq} ${chance.esq} · ${nm.dir} ${chance.dir}` }) : null,
+  ];
 }
 
 function desenharMira() {
   const g = desenhoGrafico;
   if (!g) return;
-  const i = estado.idx;
-  if (i == null || i >= g.serie.length) { g.mira.setAttribute("visibility", "hidden"); return; }
-  const q = g.serie[i];
+  if (estado.sel == null) { g.mira.setAttribute("visibility", "hidden"); g.dica.hidden = true; return; }
+  const p = g.pontos[indiceMaisProximo(g.pontos, estado.sel)];
   const [linha, ...circulos] = g.mira.children;
-  linha.setAttribute("x1", g.X(q.pct_secoes)); linha.setAttribute("x2", g.X(q.pct_secoes));
-  pontosDe(q).forEach(([, v], k) => {
+  linha.setAttribute("x1", g.X(p.x)); linha.setAttribute("x2", g.X(p.x));
+  pontosDe(p.v).forEach(([cls, v], k) => {
     const ok = v != null && v >= g.lo && v <= g.hi;
     circulos[k].setAttribute("visibility", ok ? "visible" : "hidden");
-    if (ok) { circulos[k].setAttribute("cx", g.X(q.pct_secoes)); circulos[k].setAttribute("cy", g.Y(v)); }
+    circulos[k].setAttribute("class", p.final ? cls.replace("ponto-bruto", "ponto-proj") : cls);
+    if (ok) { circulos[k].setAttribute("cx", g.X(p.x)); circulos[k].setAttribute("cy", g.Y(v)); }
   });
   g.mira.setAttribute("visibility", "visible");
+
+  g.dica.replaceChildren(...conteudoDica(g.d, g.nm, p).filter(Boolean));
+  g.dica.hidden = false;
+  const escala = g.svg.getBoundingClientRect().width / g.W;
+  const cx = g.X(p.x) * escala;
+  const largura = g.dica.offsetWidth;
+  const direita = cx + 12 + largura <= g.svg.getBoundingClientRect().width;
+  g.dica.style.left = `${Math.max(0, direita ? cx + 12 : cx - 12 - largura)}px`;
+  g.dica.style.top = `${(g.M.t + 4) * escala}px`;
 }
 
 function desenharTabelaSerie() {

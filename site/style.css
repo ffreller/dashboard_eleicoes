@@ -160,7 +160,7 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .alerta.erro { border-color: var(--erro-borda); background: var(--erro-bg); color: var(--erro-ink); }
 
 /* Abas */
-.abas { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--wash); }
+.abas { position: sticky; bottom: 8px; z-index: 5; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: linear-gradient(var(--wash), var(--wash)), var(--surf); box-shadow: 0 0 0 1px var(--line), 0 4px 14px rgb(0 0 0 / 0.14); }
 .abas [role="tab"] {
   flex: 1; min-height: 44px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent;
   color: var(--ink-2); font: 600 0.9375rem/1.2 "Public Sans", system-ui, sans-serif; cursor: pointer;
@@ -217,7 +217,7 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 
 /* Gráfico */
 
-.grafico { margin-top: 10px; margin-inline: -4px; }
+.grafico { position: relative; margin-top: 10px; margin-inline: -4px; }
 .grafico svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .grafico svg:focus-visible { outline-offset: 0; }
 .grafico text { font-family: inherit; font-size: 11px; fill: var(--ink-3); font-variant-numeric: tabular-nums; }
@@ -232,6 +232,15 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .grafico .ponto-proj { fill: var(--cor); stroke: var(--surf); stroke-width: 2; }
 .grafico .ponto-bruto { fill: var(--surf); stroke: var(--cor); stroke-width: 2.5; }
 .grafico .mira { stroke: var(--ink-3); stroke-width: 1; }
+.dica { position: absolute; z-index: 3; pointer-events: none; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surf); box-shadow: 0 4px 14px rgb(0 0 0 / 0.14); font-size: 0.8125rem; line-height: 1.35; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dica[hidden] { display: none; }
+.dica strong, .dica-sub { display: block; }
+.dica-sub { color: var(--ink-2); font-size: 0.75rem; }
+.dica-tab { display: grid; grid-template-columns: auto auto; column-gap: 14px; margin-block: 6px; text-align: right; }
+.dica-tab.com-final { grid-template-columns: auto auto auto; }
+.dica-cab { color: var(--ink-3); font-size: 0.6875rem; }
+.dica-nome { display: flex; align-items: center; gap: 6px; text-align: left; font-weight: 600; }
+.dica-cor { width: 8px; height: 8px; border-radius: 50%; background: var(--cor); }
 
 /* Tabelas */
 .tabela-gemea { margin-top: 12px; }
