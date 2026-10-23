@@ -23,6 +23,9 @@ def main() -> None:
     f.add_argument("--velocidade", type=float, default=60, help="minutos da apuração por minuto real")
     f.add_argument("--porta", type=int, default=8765)
 
+    pb = sub.add_parser("publicar", help="envia site/dados/projecao.json para a branch dados e publica no GitHub Pages")
+    pb.add_argument("--intervalo", type=float, default=60, help="segundos entre envios")
+
     s = sub.add_parser("servir", help="serve a página em site/")
     s.add_argument("--porta", type=int, default=8000)
 
@@ -39,6 +42,9 @@ def main() -> None:
     elif args.comando == "tse-falso":
         from eleicao.tse.falso import servir
         servir(args.ano, args.velocidade, args.porta)
+    elif args.comando == "publicar":
+        from eleicao.publicar import rodar
+        rodar(args.intervalo)
     elif args.comando == "servir":
         import functools
         import http.server
