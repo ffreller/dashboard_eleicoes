@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 <script>
 (function () {
   try {
@@ -51,7 +51,7 @@
 
   <section class="cartao hero" id="resposta" aria-labelledby="t-resposta">
     <div class="hero-topo">
-      <h2 id="t-resposta" class="rotulo">Projeção do resultado final</h2>
+      <h2 id="t-resposta" class="rotulo">Contagem até agora</h2>
       <span id="fase" class="fase"></span>
     </div>
 
@@ -60,61 +60,56 @@
         <div class="lado lado-esq">
           <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span><small class="cand-num" data-num="esq"></small></span>
           <span class="pct" id="pct-esq"></span>
-          <span class="faixa-txt" id="faixa-esq"></span>
         </div>
         <div class="lado lado-dir">
           <span class="nome"><small class="cand-num" data-num="dir"></small><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
           <span class="pct" id="pct-dir"></span>
-          <span class="faixa-txt" id="faixa-dir"></span>
         </div>
       </div>
-
-      <div class="barra" id="barra-proj" role="img">
+      <div class="barra" id="barra-bruta" role="img">
         <span class="marca-50"><span>50%</span></span>
         <div class="trilho">
           <span class="seg seg-esq"></span>
           <span class="seg seg-dir"></span>
-          <span class="banda" id="banda" hidden></span>
         </div>
       </div>
-      <p id="legenda-banda" class="legenda-banda" hidden><i aria-hidden="true"></i><span id="legenda-banda-txt"></span></p>
-
-      <div id="chance" class="chance" hidden>
-        <h3 class="rotulo">Chance de vencer</h3>
-        <div class="chance-nums">
-          <p class="chance-lado"><span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span><b id="chance-esq"></b></p>
-          <p class="chance-lado chance-dir"><span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span><b id="chance-dir"></b></p>
-        </div>
-        <div class="barra barra-chance" id="barra-chance" role="img">
-          <div class="trilho"><span class="seg seg-esq"></span><span class="seg seg-dir"></span></div>
-        </div>
-        <p class="nota">Esta chance sai das mesmas simulações que desenham a faixa. É uma estimativa não oficial e pode mudar à medida que a contagem avança.</p>
-      </div>
+      <p id="apuradas" class="apuradas"></p>
+      <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
     </div>
 
     <p id="frase" class="frase"></p>
-    <p class="nota-oficial">Projeção não oficial. O resultado que vale é o do TSE.</p>
+  </section>
 
-    <div id="bruto" class="bruto" hidden>
-      <div class="bruto-topo">
-        <h3 class="rotulo">Contagem até agora</h3>
-        <span id="apuradas" class="apuradas"></span>
+  <section class="cartao" id="projecao" aria-labelledby="t-projecao" hidden>
+    <h2 id="t-projecao" class="rotulo">Projeção do resultado final</h2>
+    <div class="placar">
+      <div class="lado lado-esq">
+        <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
+        <span class="pct pct-proj" id="proj-pct-esq"></span>
+        <span class="faixa-txt" id="faixa-esq"></span>
+        <span class="chance-txt">Chance de vencer <b id="chance-esq"></b></span>
       </div>
-      <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
-      <div class="barra barra-fina" id="barra-bruta" role="img">
-        <div class="trilho">
-          <span class="seg seg-esq"></span>
-          <span class="seg seg-dir"></span>
-        </div>
+      <div class="lado lado-dir">
+        <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
+        <span class="pct pct-proj" id="proj-pct-dir"></span>
+        <span class="faixa-txt" id="faixa-dir"></span>
+        <span class="chance-txt">Chance de vencer <b id="chance-dir"></b></span>
       </div>
-      <p class="bruto-nums" id="bruto-nums"></p>
-      <p class="nota" id="bruto-nota">São só os votos que o TSE já contou, e não uma previsão. As seções que faltam podem votar diferente das que já chegaram.</p>
     </div>
+    <div class="barra" id="barra-proj" role="img">
+      <span class="marca-50"><span>50%</span></span>
+      <div class="trilho">
+        <span class="seg seg-esq"></span>
+        <span class="seg seg-dir"></span>
+        <span class="banda" id="banda"></span>
+      </div>
+    </div>
+    <p id="legenda-banda" class="legenda-banda"><i aria-hidden="true"></i><span id="legenda-banda-txt"></span></p>
   </section>
 
   <section class="cartao" id="evolucao" aria-labelledby="t-evolucao">
-    <h2 id="t-evolucao">Como a projeção evoluiu</h2>
-    <p class="dek">Percentual de cada candidato nos votos válidos, conforme as seções vão sendo apuradas. Linha contínua é a projeção, com a faixa em tom claro. Linha tracejada é a contagem até agora.</p>
+    <h2 id="t-evolucao">Contagem e projeção</h2>
+    <p class="dek">Percentual de cada candidato nos votos válidos, conforme as seções vão sendo apuradas. Linha contínua é a contagem até agora. Linha pontilhada leva até a projeção do resultado final, com a faixa em tom claro.</p>
     <div id="leitura" class="leitura"></div>
     <div id="grafico" class="grafico"></div>
     <details class="tabela-gemea" id="serie-tabela">
@@ -190,6 +185,6 @@
 </footer>
 
 <noscript><p class="miolo">Esta página precisa de JavaScript para mostrar a apuração.</p></noscript>
-<script src="app.js?v=2" defer></script>
+<script src="app.js?v=3" defer></script>
 </body>
 </html>

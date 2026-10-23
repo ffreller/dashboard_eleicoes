@@ -206,19 +206,9 @@ function frase(d, sit, nm) {
       return "A apuração ainda não começou. Esta página se atualiza sozinha quando o TSE divulgar os primeiros resultados.";
     case "sem-projecao":
       return `Só ${pc(u.pct_secoes, 1)} das seções foram apuradas. A projeção aparece quando a contagem chegar a ${n(d.projecao_desde_pct, 0)}%. Até lá, o total parcial diz pouco sobre o resultado final.`;
-    case "cruza": {
-      const dif = Math.abs(2 * u.projecao.centro - 100);
-      const lider = u.projecao.centro >= 50 ? nm.esq : nm.dir;
-      const pontos = n(dif, 1) === "1,0" ? "ponto percentual" : "pontos percentuais";
-      const centro = dif < 0.05
-        ? "No centro da estimativa, os dois estão praticamente empatados."
-        : `No centro da estimativa, ${lider} aparece à frente por ${n(dif, 1)} ${pontos}.`;
-      return `A faixa da projeção ainda cruza os 50%, então o resultado final segue em aberto. ${centro}`;
-    }
-    case "um-lado": {
-      const lider = u.projecao.centro >= 50 ? nm.esq : nm.dir;
-      return `A projeção aponta ${lider} à frente, e a faixa inteira fica do mesmo lado dos 50%. Continua sendo uma estimativa e ela se mexe conforme a contagem avança.`;
-    }
+    case "cruza":
+    case "um-lado":
+      return "";
     case "encerrada": {
       const e = u.apurado ?? u.projecao?.centro;
       const restante = u.pct_secoes < 99.995 ? ` com ${pc(u.pct_secoes, 2)} das seções apuradas` : "";
@@ -239,56 +229,38 @@ function desenharResposta() {
     const c = d.candidatos[e.dataset.num];
     e.textContent = `${c.numero} · ${c.partido}`;
   }
-  $("legenda-banda").hidden = !(sit.tipo === "cruza" || sit.tipo === "um-lado");
   $("legenda-banda-txt").textContent = `Faixa de incerteza da projeção (${n(d.nivel_faixa, 0)}%)`;
   $("fase").textContent = ROTULO_FASE[d.fase];
   $("fase").dataset.fase = d.fase;
-  $("t-resposta").textContent = d.fase === "encerrada" ? "Contagem final" : "Projeção do resultado final";
+  $("t-resposta").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem até agora";
 
-  const temNumeros = sit.tipo !== "aguardando";
+  const u = sit.u;
+  const apurado = sit.tipo === "encerrada" ? (u.apurado ?? u.projecao?.centro) : u?.apurado;
+  const temNumeros = sit.tipo !== "aguardando" && apurado != null;
   $("hero-corpo").hidden = !temNumeros;
   if (temNumeros) {
-    const proj = sit.tipo === "cruza" || sit.tipo === "um-lado" ? sit.u.projecao : null;
-    const centro = sit.tipo === "encerrada" ? (sit.u.apurado ?? sit.u.projecao?.centro) : proj?.centro;
-    const barra = $("barra-proj");
-    barra.hidden = centro == null;
-    if (centro != null) {
-      pctHtml($("pct-esq"), pc(centro));
-      pctHtml($("pct-dir"), pc(100 - centro));
-      setBarra(barra, centro, proj);
-      const nivel = n(d.nivel_faixa, 0);
-      barra.setAttribute("aria-label", proj
-        ? `Projeção: ${nm.esq} ${pc(centro)}, ${nm.dir} ${pc(100 - centro)}. Faixa de ${nivel}% para ${nm.esq}: de ${pc(proj.baixo)} a ${pc(proj.alto)}.`
-        : `Contagem final: ${nm.esq} ${pc(centro)}, ${nm.dir} ${pc(100 - centro)}.`);
-    } else {
-      pctHtml($("pct-esq"), "–");
-      pctHtml($("pct-dir"), "–");
-    }
-    $("faixa-esq").textContent = proj ? `faixa: ${n(proj.baixo)} a ${n(proj.alto)}` : centro == null ? `a partir de ${n(d.projecao_desde_pct, 0)}% das seções` : "";
-    $("faixa-dir").textContent = proj ? `faixa: ${n(100 - proj.alto)} a ${n(100 - proj.baixo)}` : "";
-  }
-
-  const ch = sit.u ? chanceDe(d, sit.u) : null;
-  $("chance").hidden = !ch;
-  if (ch) {
-    $("chance-esq").textContent = ch.esq;
-    $("chance-dir").textContent = ch.dir;
-    // Limita a barra a 1%–99% para nenhum lado sumir.
-    setBarra($("barra-chance"), Math.min(99, Math.max(1, sit.u.projecao.chance)), null);
-    $("barra-chance").setAttribute("aria-label", `Chance de vencer: ${nm.esq} ${ch.esq}, ${nm.dir} ${ch.dir}.`);
+    pctHtml($("pct-esq"), pc(apurado));
+    pctHtml($("pct-dir"), pc(100 - apurado));
+    setBarra($("barra-bruta"), apurado, null);
+    $("barra-bruta").setAttribute("aria-label", `Contagem: ${nm.esq} ${pc(apurado)}, ${nm.dir} ${pc(100 - apurado)}.`);
+    $("apuradas").textContent = `${pc(u.pct_secoes, 2)} das seções apuradas`;
+    $("progresso").style.setProperty("--p", `${u.pct_secoes}%`);
   }
 
   $("frase").textContent = frase(d, sit, nm);
 
-  const u = sit.u;
-  const mostrarBruto = (sit.tipo === "sem-projecao" || sit.tipo === "cruza" || sit.tipo === "um-lado") && u.apurado != null;
-  $("bruto").hidden = !mostrarBruto;
-  if (mostrarBruto) {
-    $("apuradas").textContent = `${pc(u.pct_secoes, 2)} das seções apuradas`;
-    $("progresso").style.setProperty("--p", `${u.pct_secoes}%`);
-    setBarra($("barra-bruta"), u.apurado, null);
-    $("barra-bruta").setAttribute("aria-label", `Contagem até agora: ${nm.esq} ${pc(u.apurado)}, ${nm.dir} ${pc(100 - u.apurado)}.`);
-    $("bruto-nums").replaceChildren(`${nm.esq} ${pc(u.apurado)}`, el("span", { class: "sep", "aria-hidden": "true" }, "·"), `${nm.dir} ${pc(100 - u.apurado)}`);
+  const proj = sit.tipo === "cruza" || sit.tipo === "um-lado" ? u.projecao : null;
+  $("projecao").hidden = !proj;
+  if (proj) {
+    pctHtml($("proj-pct-esq"), pc(proj.centro));
+    pctHtml($("proj-pct-dir"), pc(100 - proj.centro));
+    setBarra($("barra-proj"), proj.centro, proj);
+    $("barra-proj").setAttribute("aria-label", `Projeção: ${nm.esq} ${pc(proj.centro)}, ${nm.dir} ${pc(100 - proj.centro)}. Faixa de ${n(d.nivel_faixa, 0)}% para ${nm.esq}: de ${pc(proj.baixo)} a ${pc(proj.alto)}.`);
+    $("faixa-esq").textContent = `faixa: ${n(proj.baixo)} a ${n(proj.alto)}`;
+    $("faixa-dir").textContent = `faixa: ${n(100 - proj.alto)} a ${n(100 - proj.baixo)}`;
+    const ch = chanceDe(d, u);
+    $("chance-esq").textContent = ch?.esq ?? "–";
+    $("chance-dir").textContent = ch?.dir ?? "–";
   }
 }
 
@@ -315,13 +287,34 @@ function segmentos(serie, pega) {
 let desenhoGrafico = null;
 
 function pontosDe(q) {
-  const espelho = (v) => (v == null ? null : 100 - v);
+  const v = q.apurado;
   return [
-    ["ponto-bruto cor-esq", q.apurado, 4.5],
-    ["ponto-bruto cor-dir", espelho(q.apurado), 4.5],
-    ["ponto-proj cor-esq", q.projecao?.centro, 5],
-    ["ponto-proj cor-dir", espelho(q.projecao?.centro), 5],
+    ["ponto-bruto cor-esq", v],
+    ["ponto-bruto cor-dir", v == null ? null : 100 - v],
   ];
+}
+
+// Caminho da contagem do ponto atual até 100% se ela terminar na projeção (ou numa ponta da faixa).
+// O voto restante entra a uma taxa constante, então a parcial acumulada é a média ponderada
+// do que já foi contado com essa taxa: anda rápido logo depois do ponto atual e depois se acomoda.
+function caminhoAteFim(q, passos = 32) {
+  const pr = q.projecao;
+  if (!pr || q.apurado == null || q.pct_secoes >= 100) return [];
+  const f0 = (q.pct_aptos ?? q.pct_secoes) / 100;
+  const acumulado = (fim, f) => {
+    const taxa = (fim - f0 * q.apurado) / (1 - f0);
+    return (f0 * q.apurado + (f - f0) * taxa) / f;
+  };
+  return Array.from({ length: passos + 1 }, (_, k) => {
+    const t = k / passos;
+    const f = f0 + t * (1 - f0);
+    return {
+      x: q.pct_secoes + t * (100 - q.pct_secoes),
+      centro: acumulado(pr.centro, f),
+      baixo: acumulado(pr.baixo, f),
+      alto: acumulado(pr.alto, f),
+    };
+  });
 }
 
 function desenharGrafico() {
@@ -343,12 +336,10 @@ function desenharGrafico() {
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
   // Eixo simétrico em torno de 50%: as linhas dos dois candidatos são espelhos uma da outra.
+  const ultimo = serie.at(-1);
   let desvio = 3;
-  for (const q of serie) {
-    if (q.pct_secoes < d.projecao_desde_pct) continue;
-    for (const v of [q.apurado, q.projecao?.baixo, q.projecao?.alto]) {
-      if (v != null) desvio = Math.max(desvio, Math.abs(v - 50));
-    }
+  for (const v of [...serie.filter((q) => q.pct_secoes >= d.projecao_desde_pct).map((q) => q.apurado), ultimo.projecao?.baixo, ultimo.projecao?.alto]) {
+    if (v != null) desvio = Math.max(desvio, Math.abs(v - 50));
   }
   desvio = Math.min(50, desvio * 1.16);
   const lo = 50 - desvio, hi = 50 + desvio;
@@ -361,9 +352,8 @@ function desenharGrafico() {
   for (let k = -Math.floor(desvio / passo + 1e-9); k <= Math.floor(desvio / passo + 1e-9); k++) ticksY.push(Math.round((50 + k * passo) * 100) / 100);
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0", focusable: "true" });
-  const ultimo = serie.at(-1);
   svg.setAttribute("aria-label", `Gráfico da evolução. Último ponto: ${pc(ultimo.pct_secoes, 1)} das seções apuradas`
-    + (ultimo.projecao ? `, projeção de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
+    + (ultimo.projecao ? `, projeção final de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
     + `. Use as setas do teclado para percorrer os pontos. Os mesmos dados estão na tabela abaixo.`);
 
   const recorte = sv("clipPath", { id: "recorte" }, sv("rect", { x: M.l, y: M.t, width: iw, height: ih }));
@@ -401,31 +391,38 @@ function desenharGrafico() {
     titulo, rotEsq, rotDir,
   );
 
-  const pto = (q, y) => `${X(q.pct_secoes).toFixed(1)},${Y(y).toFixed(1)}`;
-  const area = (f) => segmentos(serie, (q) => q.projecao).map((seg) =>
-    `M${seg.map(([q, pr]) => pto(q, f(pr).alto)).join("L")}L${seg.map(([q, pr]) => pto(q, f(pr).baixo)).reverse().join("L")}Z`).join("");
-  const linha = (pega, f) => segmentos(serie, pega).map((s) => "M" + s.map(([q, v]) => pto(q, f(v))).join("L")).join("");
-  const igual = (pr) => pr;
-  const espelho = (pr) => ({ baixo: 100 - pr.alto, alto: 100 - pr.baixo });
+  const pto = (x, y) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`;
   const espelhar = (v) => 100 - v;
+  const igual = (v) => v;
+  const contagem = (f) => segmentos(serie, (q) => q.apurado).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
+  const caminho = caminhoAteFim(ultimo);
+  const fimLinha = (f) => caminho.length ? "M" + caminho.map((c) => pto(c.x, f(c.centro))).join("L") : "";
+  const fimFaixa = (f) => caminho.length
+    ? `M${caminho.map((c) => pto(c.x, f(c.alto))).join("L")}L${caminho.map((c) => pto(c.x, f(c.baixo))).reverse().join("L")}Z`
+    : "";
   const grupo = sv("g", { "clip-path": "url(#recorte)" },
-    sv("path", { class: "faixa-area cor-esq", d: area(igual) }),
-    sv("path", { class: "faixa-area cor-dir", d: area(espelho) }),
-    sv("path", { class: "linha-bruta cor-esq", d: linha((q) => q.apurado, igual) }),
-    sv("path", { class: "linha-bruta cor-dir", d: linha((q) => q.apurado, espelhar) }),
-    sv("path", { class: "linha-proj cor-esq", d: linha((q) => q.projecao?.centro, igual) }),
-    sv("path", { class: "linha-proj cor-dir", d: linha((q) => q.projecao?.centro, espelhar) }),
+    sv("path", { class: "faixa-area cor-esq", d: fimFaixa(igual) }),
+    sv("path", { class: "faixa-area cor-dir", d: fimFaixa(espelhar) }),
+    sv("path", { class: "linha-proj cor-esq", d: fimLinha(igual) }),
+    sv("path", { class: "linha-proj cor-dir", d: fimLinha(espelhar) }),
+    sv("path", { class: "linha-bruta cor-esq", d: contagem(igual) }),
+    sv("path", { class: "linha-bruta cor-dir", d: contagem(espelhar) }),
   );
   svg.append(grupo);
 
   const dentro = (v) => v != null && v >= lo && v <= hi;
-  for (const [cls, v, r] of pontosDe(ultimo)) {
-    if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(ultimo.pct_secoes), cy: Y(v), r }));
+  if (caminho.length) {
+    for (const [cls, v] of [["ponto-proj cor-esq", ultimo.projecao.centro], ["ponto-proj cor-dir", 100 - ultimo.projecao.centro]]) {
+      if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(100), cy: Y(v), r: 5 }));
+    }
+  }
+  for (const [cls, v] of pontosDe(ultimo)) {
+    if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(ultimo.pct_secoes), cy: Y(v), r: 4.5 }));
   }
 
   const mira = sv("g", { visibility: "hidden", "pointer-events": "none" },
     sv("line", { class: "mira", y1: M.t, y2: M.t + ih }),
-    ...pontosDe({}).map(([cls, , r]) => sv("circle", { class: cls, r })),
+    ...pontosDe({}).map(([cls]) => sv("circle", { class: cls, r: 4.5 })),
   );
   svg.append(mira);
 
