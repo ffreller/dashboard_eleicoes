@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 from eleicao import config
 from eleicao.config import UFS, Divulgacao, Eleicao
-from eleicao.saida import Fase, Saida
+from eleicao.saida import Fase, Saida, ler_validacao
 from eleicao.tipos import Apuracao, Base, Projecao
 from eleicao.tse.apuracao import Estado, Montagem, montar
 from eleicao.tse.arquivos import Andamento, ArquivoInesperado, ler_andamento, ler_resultado, ler_secoes
@@ -139,7 +139,7 @@ def rodar(
     base = Base.ler(pasta or config.BASES / str(ano))
     if modelo is None:
         from eleicao.modelo import Modelo as modelo
-    saida = Saida(eleicao, base, destino or config.SITE / "dados" / "projecao.json")
+    saida = Saida(eleicao, base, destino or config.SITE / "dados" / "projecao.json", ler_validacao(config.DADOS / "ensaio"))
     try:
         asyncio.run(_laco(eleicao, div, base, modelo(base), saida, intervalo, ciclos, por_segundo))
     except KeyboardInterrupt:

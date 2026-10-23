@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 import numpy as np
 
@@ -28,6 +29,8 @@ NOMES_UF = {
     "to": "Tocantins", "zz": "Exterior",
 }
 
+BRASILIA = ZoneInfo("America/Sao_Paulo")
+
 NIVEL_FAIXA = 95
 PROJECAO_DESDE_PCT = 1.0
 
@@ -36,9 +39,16 @@ def _faixa(f: Faixa | None) -> dict | None:
     return None if f is None else {"centro": round(f.centro, 2), "baixo": round(f.baixo, 2), "alto": round(f.alto, 2)}
 
 
+def _hora(momento: datetime) -> str:
+    """ISO com fuso: horários sem fuso vêm do TSE e da máquina e estão em horário de Brasília."""
+    if momento.tzinfo is None:
+        momento = momento.replace(tzinfo=BRASILIA)
+    return momento.isoformat(timespec="seconds")
+
+
 def _ponto(momento: datetime, r: Recorte) -> dict:
     return {
-        "hora": momento.isoformat(timespec="seconds"),
+        "hora": _hora(momento),
         "pct_secoes": round(r.pct_secoes, 2),
         "pct_aptos": round(r.pct_aptos, 2),
         "apurado": None if r.apurado is None else round(r.apurado, 2),
@@ -117,7 +127,7 @@ class Saida:
                 for lado, c in (("esq", e.esquerda), ("dir", e.direita))
             },
             "fase": fase,
-            "atualizado": agora.isoformat(timespec="seconds"),
+            "atualizado": _hora(agora),
             "nivel_faixa": NIVEL_FAIXA,
             "projecao_desde_pct": PROJECAO_DESDE_PCT,
             "serie": self.serie,
