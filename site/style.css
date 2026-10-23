@@ -175,7 +175,6 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .dek { margin-top: 6px; color: var(--ink-2); font-size: 0.9375rem; }
 .subtitulo { margin-top: 24px; font-size: 1rem; font-weight: 700; }
 .nota { margin-top: 6px; font-size: 0.8125rem; color: var(--ink-3); }
-.rotulo { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 
 /* Resposta */
 #evolucao { display: flex; flex-direction: column; gap: 20px; }
@@ -256,7 +255,6 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .grafico .ponto-bruto { fill: var(--surf); stroke: var(--cor); stroke-width: 2.5; }
 .grafico .mira { stroke: var(--ink-3); stroke-width: 1; }
 .dica { position: absolute; z-index: 3; pointer-events: none; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surf); box-shadow: 0 4px 14px rgb(0 0 0 / 0.14); font-size: 0.8125rem; line-height: 1.35; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.dica[hidden] { display: none; }
 .dica strong, .dica-sub { display: block; }
 .dica-sub { color: var(--ink-2); font-size: 0.75rem; }
 .dica-tab { display: grid; grid-template-columns: auto auto; column-gap: 14px; margin-block: 6px; text-align: right; }

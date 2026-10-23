@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 <script>
 (function () {
   try {
@@ -43,7 +43,7 @@
 </div>
 
 <main id="principal" class="miolo">
-  <div class="status" id="barra-status">
+  <div class="status">
     <div class="status-esq">
       <span id="fase" class="fase"></span>
       <p id="status" role="status" aria-live="polite">Carregando os dados…</p>
@@ -56,7 +56,7 @@
     <p id="frase" class="frase"></p>
 
     <div class="cartoes" id="cartoes" hidden>
-      <div class="cartao" id="cartao-contagem">
+      <div class="cartao">
         <h2 id="t-contagem">Contagem até agora</h2>
         <div class="placar">
           <div class="lado">
@@ -118,7 +118,7 @@
   </section>
 
   <section class="cartao" id="estados" role="tabpanel" aria-labelledby="aba-estados" hidden>
-    <h2 id="t-estados">Estado por estado</h2>
+    <h2>Estado por estado</h2>
     <p class="dek">Cor pela projeção em cada estado. A barra na base de cada quadrado mostra quanto das seções já foi apurado.</p>
     <div id="mapa" class="mapa" role="group" aria-label="Mapa de quadrados dos estados brasileiros"></div>
     <div id="mapa-legenda" class="mapa-legenda"></div>
@@ -130,7 +130,7 @@
   </section>
 
   <section class="cartao" id="como-funciona" role="tabpanel" aria-labelledby="aba-como-funciona" hidden>
-    <h2 id="t-como">Metodologia: como funciona</h2>
+    <h2>Metodologia: como funciona</h2>
     <p>Durante a contagem, os primeiros votos a chegar quase nunca são um retrato do país inteiro. Cada região termina de apurar numa hora diferente. Por isso a projeção não olha só o total parcial.</p>
     <ol class="passos">
       <li><strong>Comparar.</strong> Para cada seção eleitoral já apurada, vemos como ela votou agora e como votou no 2º turno de 2022 e no 1º turno de 2026.</li>
@@ -141,7 +141,7 @@
     <p>A <strong>faixa</strong> mostra a incerteza: quanto a estimativa ainda pode errar. Ela começa larga, quando pouco foi apurado, e vai estreitando conforme a contagem avança. Enquanto a faixa ainda cruza os 50%, o resultado está em aberto.</p>
     <p>A <strong>chance de vencer</strong> sai das mesmas simulações: é a parcela dos cenários simulados em que cada candidato termina com mais da metade dos votos válidos. Se um candidato aparece com 30%, ele terminou na frente em cerca de 30 de cada 100 cenários. Não é uma pesquisa de opinião nem uma garantia, e o número muda conforme a contagem avança.</p>
 
-    <details class="detalhes" id="detalhes-tecnicos">
+    <details class="detalhes">
       <summary>Detalhes técnicos</summary>
       <div class="detalhes-corpo">
         <p><strong>Referências de cada seção.</strong> Para cada uma das cerca de 499 mil seções (urnas), a página guarda o
