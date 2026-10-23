@@ -1,0 +1,575 @@
+{
+ "versao": 1,
+ "exemplo": true,
+ "eleicao": {
+  "ano": 2026,
+  "turno": 2,
+  "cargo": "Presidente"
+ },
+ "candidatos": {
+  "esq": {
+   "nome": "Lula",
+   "numero": 13,
+   "partido": "PT"
+  },
+  "dir": {
+   "nome": "Flávio Bolsonaro",
+   "numero": 22,
+   "partido": "PL"
+  }
+ },
+ "fase": "apurando",
+ "atualizado": "2026-10-25T17:42:00-03:00",
+ "nivel_faixa": 95,
+ "projecao_desde_pct": 1.0,
+ "serie": [
+  {
+   "hora": "2026-10-25T17:00:00-03:00",
+   "pct_secoes": 0.0,
+   "pct_aptos": 0.0,
+   "apurado": null,
+   "votos_validos": 0,
+   "projecao": null
+  },
+  {
+   "hora": "2026-10-25T17:03:00-03:00",
+   "pct_secoes": 5.4,
+   "pct_aptos": 5.3,
+   "apurado": 47.18,
+   "votos_validos": 6376782,
+   "projecao": {
+    "centro": 52.11,
+    "baixo": 50.67,
+    "alto": 53.54
+   }
+  },
+  {
+   "hora": "2026-10-25T17:06:00-03:00",
+   "pct_secoes": 10.52,
+   "pct_aptos": 10.31,
+   "apurado": 47.8,
+   "votos_validos": 12408960,
+   "projecao": {
+    "centro": 52.02,
+    "baixo": 50.89,
+    "alto": 53.15
+   }
+  },
+  {
+   "hora": "2026-10-25T17:09:00-03:00",
+   "pct_secoes": 15.35,
+   "pct_aptos": 15.04,
+   "apurado": 48.41,
+   "votos_validos": 18115156,
+   "projecao": {
+    "centro": 51.78,
+    "baixo": 50.79,
+    "alto": 52.77
+   }
+  },
+  {
+   "hora": "2026-10-25T17:12:00-03:00",
+   "pct_secoes": 19.93,
+   "pct_aptos": 19.53,
+   "apurado": 48.89,
+   "votos_validos": 23512986,
+   "projecao": {
+    "centro": 51.79,
+    "baixo": 50.88,
+    "alto": 52.7
+   }
+  },
+  {
+   "hora": "2026-10-25T17:15:00-03:00",
+   "pct_secoes": 24.25,
+   "pct_aptos": 23.77,
+   "apurado": 49.23,
+   "votos_validos": 28619114,
+   "projecao": {
+    "centro": 51.82,
+    "baixo": 50.97,
+    "alto": 52.66
+   }
+  },
+  {
+   "hora": "2026-10-25T17:18:00-03:00",
+   "pct_secoes": 28.35,
+   "pct_aptos": 27.78,
+   "apurado": 49.43,
+   "votos_validos": 33449305,
+   "projecao": {
+    "centro": 51.97,
+    "baixo": 51.17,
+    "alto": 52.77
+   }
+  },
+  {
+   "hora": "2026-10-25T17:21:00-03:00",
+   "pct_secoes": 32.22,
+   "pct_aptos": 31.57,
+   "apurado": 49.91,
+   "votos_validos": 38018469,
+   "projecao": {
+    "centro": 51.86,
+    "baixo": 51.08,
+    "alto": 52.63
+   }
+  },
+  {
+   "hora": "2026-10-25T17:24:00-03:00",
+   "pct_secoes": 35.88,
+   "pct_aptos": 35.16,
+   "apurado": 49.94,
+   "votos_validos": 42340714,
+   "projecao": {
+    "centro": 52.05,
+    "baixo": 51.3,
+    "alto": 52.79
+   }
+  },
+  {
+   "hora": "2026-10-25T17:27:00-03:00",
+   "pct_secoes": 39.35,
+   "pct_aptos": 38.56,
+   "apurado": 50.35,
+   "votos_validos": 46429382,
+   "projecao": {
+    "centro": 52.03,
+    "baixo": 51.31,
+    "alto": 52.75
+   }
+  },
+  {
+   "hora": "2026-10-25T17:30:00-03:00",
+   "pct_secoes": 42.62,
+   "pct_aptos": 41.77,
+   "apurado": 50.34,
+   "votos_validos": 50297096,
+   "projecao": {
+    "centro": 52.17,
+    "baixo": 51.46,
+    "alto": 52.87
+   }
+  },
+  {
+   "hora": "2026-10-25T17:33:00-03:00",
+   "pct_secoes": 45.73,
+   "pct_aptos": 44.81,
+   "apurado": 50.37,
+   "votos_validos": 53955797,
+   "projecao": {
+    "centro": 52.12,
+    "baixo": 51.43,
+    "alto": 52.81
+   }
+  },
+  {
+   "hora": "2026-10-25T17:36:00-03:00",
+   "pct_secoes": 48.66,
+   "pct_aptos": 47.69,
+   "apurado": 50.57,
+   "votos_validos": 57416779,
+   "projecao": {
+    "centro": 51.88,
+    "baixo": 51.2,
+    "alto": 52.56
+   }
+  },
+  {
+   "hora": "2026-10-25T17:39:00-03:00",
+   "pct_secoes": 51.43,
+   "pct_aptos": 50.4,
+   "apurado": 50.62,
+   "votos_validos": 60690729,
+   "projecao": {
+    "centro": 51.94,
+    "baixo": 51.27,
+    "alto": 52.6
+   }
+  },
+  {
+   "hora": "2026-10-25T17:42:00-03:00",
+   "pct_secoes": 54.06,
+   "pct_aptos": 52.98,
+   "apurado": 50.92,
+   "votos_validos": 63787752,
+   "projecao": {
+    "centro": 51.9,
+    "baixo": 51.24,
+    "alto": 52.55
+   }
+  }
+ ],
+ "ufs": [
+  {
+   "uf": "AC",
+   "nome": "Acre",
+   "pct_secoes": 54.65,
+   "apurado": 35.36,
+   "projecao": {
+    "centro": 34.58,
+    "baixo": 34.25,
+    "alto": 34.91
+   },
+   "primeiro_turno": 30.0,
+   "segundo_turno_anterior": 28.09
+  },
+  {
+   "uf": "AL",
+   "nome": "Alagoas",
+   "pct_secoes": 44.55,
+   "apurado": 59.49,
+   "projecao": {
+    "centro": 58.4,
+    "baixo": 57.34,
+    "alto": 59.46
+   },
+   "primeiro_turno": 58.0,
+   "segundo_turno_anterior": 58.26
+  },
+  {
+   "uf": "AM",
+   "nome": "Amazonas",
+   "pct_secoes": 51.35,
+   "apurado": 47.27,
+   "projecao": {
+    "centro": 48.38,
+    "baixo": 47.81,
+    "alto": 48.94
+   },
+   "primeiro_turno": 47.0,
+   "segundo_turno_anterior": 49.49
+  },
+  {
+   "uf": "AP",
+   "nome": "Amapá",
+   "pct_secoes": 54.75,
+   "apurado": 50.74,
+   "projecao": {
+    "centro": 49.52,
+    "baixo": 49.2,
+    "alto": 49.83
+   },
+   "primeiro_turno": 45.0,
+   "segundo_turno_anterior": 47.55
+  },
+  {
+   "uf": "BA",
+   "nome": "Bahia",
+   "pct_secoes": 50.71,
+   "apurado": 70.83,
+   "projecao": {
+    "centro": 70.76,
+    "baixo": 70.15,
+    "alto": 71.37
+   },
+   "primeiro_turno": 70.0,
+   "segundo_turno_anterior": 68.84
+  },
+  {
+   "uf": "CE",
+   "nome": "Ceará",
+   "pct_secoes": 38.98,
+   "apurado": 64.69,
+   "projecao": {
+    "centro": 65.57,
+    "baixo": 64.1,
+    "alto": 67.03
+   },
+   "primeiro_turno": 66.0,
+   "segundo_turno_anterior": 64.07
+  },
+  {
+   "uf": "DF",
+   "nome": "Distrito Federal",
+   "pct_secoes": 49.93,
+   "apurado": 42.93,
+   "projecao": {
+    "centro": 43.14,
+    "baixo": 42.47,
+    "alto": 43.81
+   },
+   "primeiro_turno": 38.0,
+   "segundo_turno_anterior": 41.5
+  },
+  {
+   "uf": "ES",
+   "nome": "Espírito Santo",
+   "pct_secoes": 54.8,
+   "apurado": 44.59,
+   "projecao": {
+    "centro": 45.13,
+    "baixo": 44.82,
+    "alto": 45.44
+   },
+   "primeiro_turno": 40.0,
+   "segundo_turno_anterior": 37.76
+  },
+  {
+   "uf": "GO",
+   "nome": "Goiás",
+   "pct_secoes": 42.25,
+   "apurado": 34.4,
+   "projecao": {
+    "centro": 35.58,
+    "baixo": 34.35,
+    "alto": 36.81
+   },
+   "primeiro_turno": 35.0,
+   "segundo_turno_anterior": 35.99
+  },
+  {
+   "uf": "MA",
+   "nome": "Maranhão",
+   "pct_secoes": 53.36,
+   "apurado": 73.36,
+   "projecao": {
+    "centro": 73.44,
+    "baixo": 73.02,
+    "alto": 73.86
+   },
+   "primeiro_turno": 69.0,
+   "segundo_turno_anterior": 70.22
+  },
+  {
+   "uf": "MG",
+   "nome": "Minas Gerais",
+   "pct_secoes": 51.69,
+   "apurado": 48.55,
+   "projecao": {
+    "centro": 47.91,
+    "baixo": 47.37,
+    "alto": 48.45
+   },
+   "primeiro_turno": 48.0,
+   "segundo_turno_anterior": 51.28
+  },
+  {
+   "uf": "MS",
+   "nome": "Mato Grosso do Sul",
+   "pct_secoes": 51.41,
+   "apurado": 39.81,
+   "projecao": {
+    "centro": 39.9,
+    "baixo": 39.34,
+    "alto": 40.46
+   },
+   "primeiro_turno": 36.0,
+   "segundo_turno_anterior": 33.43
+  },
+  {
+   "uf": "MT",
+   "nome": "Mato Grosso",
+   "pct_secoes": 51.52,
+   "apurado": 35.6,
+   "projecao": {
+    "centro": 34.4,
+    "baixo": 33.84,
+    "alto": 34.95
+   },
+   "primeiro_turno": 33.0,
+   "segundo_turno_anterior": 36.77
+  },
+  {
+   "uf": "PA",
+   "nome": "Pará",
+   "pct_secoes": 45.03,
+   "apurado": 56.6,
+   "projecao": {
+    "centro": 54.81,
+    "baixo": 53.78,
+    "alto": 55.83
+   },
+   "primeiro_turno": 53.0,
+   "segundo_turno_anterior": 54.8
+  },
+  {
+   "uf": "PB",
+   "nome": "Paraíba",
+   "pct_secoes": 41.3,
+   "apurado": 63.77,
+   "projecao": {
+    "centro": 65.16,
+    "baixo": 63.87,
+    "alto": 66.46
+   },
+   "primeiro_turno": 65.0,
+   "segundo_turno_anterior": 68.24
+  },
+  {
+   "uf": "PE",
+   "nome": "Pernambuco",
+   "pct_secoes": 51.81,
+   "apurado": 66.58,
+   "projecao": {
+    "centro": 65.28,
+    "baixo": 64.75,
+    "alto": 65.81
+   },
+   "primeiro_turno": 65.0,
+   "segundo_turno_anterior": 68.84
+  },
+  {
+   "uf": "PI",
+   "nome": "Piauí",
+   "pct_secoes": 49.35,
+   "apurado": 75.7,
+   "projecao": {
+    "centro": 75.5,
+    "baixo": 74.79,
+    "alto": 76.21
+   },
+   "primeiro_turno": 74.0,
+   "segundo_turno_anterior": 71.05
+  },
+  {
+   "uf": "PR",
+   "nome": "Paraná",
+   "pct_secoes": 38.74,
+   "apurado": 40.82,
+   "projecao": {
+    "centro": 40.23,
+    "baixo": 38.74,
+    "alto": 41.71
+   },
+   "primeiro_turno": 35.0,
+   "segundo_turno_anterior": 35.21
+  },
+  {
+   "uf": "RJ",
+   "nome": "Rio de Janeiro",
+   "pct_secoes": 53.91,
+   "apurado": 45.49,
+   "projecao": {
+    "centro": 44.0,
+    "baixo": 43.62,
+    "alto": 44.38
+   },
+   "primeiro_turno": 42.0,
+   "segundo_turno_anterior": 44.61
+  },
+  {
+   "uf": "RN",
+   "nome": "Rio Grande do Norte",
+   "pct_secoes": 41.98,
+   "apurado": 63.08,
+   "projecao": {
+    "centro": 63.91,
+    "baixo": 62.66,
+    "alto": 65.16
+   },
+   "primeiro_turno": 63.0,
+   "segundo_turno_anterior": 60.92
+  },
+  {
+   "uf": "RO",
+   "nome": "Rondônia",
+   "pct_secoes": 48.17,
+   "apurado": 29.63,
+   "projecao": {
+    "centro": 29.96,
+    "baixo": 29.16,
+    "alto": 30.75
+   },
+   "primeiro_turno": 29.0,
+   "segundo_turno_anterior": 26.05
+  },
+  {
+   "uf": "RR",
+   "nome": "Roraima",
+   "pct_secoes": 53.52,
+   "apurado": 26.36,
+   "projecao": {
+    "centro": 26.52,
+    "baixo": 26.11,
+    "alto": 26.93
+   },
+   "primeiro_turno": 25.0,
+   "segundo_turno_anterior": 25.67
+  },
+  {
+   "uf": "RS",
+   "nome": "Rio Grande do Sul",
+   "pct_secoes": 53.42,
+   "apurado": 44.59,
+   "projecao": {
+    "centro": 42.92,
+    "baixo": 42.51,
+    "alto": 43.34
+   },
+   "primeiro_turno": 41.0,
+   "segundo_turno_anterior": 41.01
+  },
+  {
+   "uf": "SC",
+   "nome": "Santa Catarina",
+   "pct_secoes": 47.27,
+   "apurado": 30.62,
+   "projecao": {
+    "centro": 32.54,
+    "baixo": 31.68,
+    "alto": 33.4
+   },
+   "primeiro_turno": 30.0,
+   "segundo_turno_anterior": 29.52
+  },
+  {
+   "uf": "SE",
+   "nome": "Sergipe",
+   "pct_secoes": 41.52,
+   "apurado": 66.62,
+   "projecao": {
+    "centro": 65.42,
+    "baixo": 64.14,
+    "alto": 66.7
+   },
+   "primeiro_turno": 66.0,
+   "segundo_turno_anterior": 63.38
+  },
+  {
+   "uf": "SP",
+   "nome": "São Paulo",
+   "pct_secoes": 46.31,
+   "apurado": 44.98,
+   "projecao": {
+    "centro": 44.75,
+    "baixo": 43.82,
+    "alto": 45.68
+   },
+   "primeiro_turno": 41.0,
+   "segundo_turno_anterior": 39.61
+  },
+  {
+   "uf": "TO",
+   "nome": "Tocantins",
+   "pct_secoes": 47.05,
+   "apurado": 50.87,
+   "projecao": {
+    "centro": 49.73,
+    "baixo": 48.85,
+    "alto": 50.61
+   },
+   "primeiro_turno": 47.0,
+   "segundo_turno_anterior": 43.85
+  },
+  {
+   "uf": "ZZ",
+   "nome": "Exterior",
+   "pct_secoes": 47.75,
+   "apurado": 45.0,
+   "projecao": {
+    "centro": 45.89,
+    "baixo": 45.06,
+    "alto": 46.72
+   },
+   "primeiro_turno": 45.0,
+   "segundo_turno_anterior": 47.18
+  }
+ ],
+ "validacao": {
+  "eleicao": "2º turno de 2022",
+  "erro_medio_pp": 0.2,
+  "desde_pct": 5.0,
+  "cobertura_faixa": 0.95
+ }
+}
