@@ -12,3 +12,4 @@ wheels/
 # Dados baixados e gerados
 data/
 site/dados/projecao.json
+.claude/worktrees/

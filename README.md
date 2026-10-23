@@ -15,6 +15,14 @@ faltam. A faixa vem de 200 sorteios e inclui um choque comum para tudo o que fal
 
 O detalhe está em `src/eleicao/modelo/projecao.py` e na seção "Detalhes técnicos" da página.
 
+A página também compara a diferença Lula − adversário com o 1º turno de 2026 e o 2º turno de 2022, na ordem real
+de chegada das seções. Essas curvas ficam em `site/dados/referencias.json`, versionado, e só mudam se você
+refizer a base:
+
+```sh
+uv run python scripts/gerar_referencias.py
+```
+
 ## Preparar (uma vez)
 
 ```sh
