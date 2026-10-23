@@ -67,6 +67,7 @@ const estado = {
   falha: null,
   proximo: 0,
   sel: null,
+  referencias: null,
   uf: null,
   ord: { chave: "nome", dir: 1 },
 };
@@ -486,6 +487,7 @@ function definirSel(x) {
   if (x === estado.sel) return;
   estado.sel = x;
   desenharMira();
+  desenharMiraComparacao();
 }
 
 function conteudoDica(d, nm, p) {
@@ -560,6 +562,185 @@ function desenharTabelaSerie() {
     el("thead", {}, el("tr", {},
       ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
     el("tbody", {}, linhas)));
+}
+
+/* Gráfico de comparação */
+
+const CURTO = { atual: "2026", "1t2026": "1º turno", "2t2022": "2022" };
+const sinal = (v, d = 1) => (Math.abs(v) < 0.5 * 10 ** -d ? n(0, d) : (v > 0 ? "+" : "−") + n(Math.abs(v), d));
+
+function curvasComparacao(d) {
+  const atual = d.fase === "aguardando" ? [] : d.serie.filter((q) => q.apurado != null).map((q) => [q.pct_secoes, 2 * q.apurado - 100]);
+  const rotulo = `2º turno de 2026 (${d.fase === "encerrada" ? "final" : "agora"})`;
+  return [{ id: "atual", rotulo, pontos: atual }, ...estado.referencias.curvas].filter((c) => c.pontos.length);
+}
+
+function valorEm(pontos, x) {
+  if (x < pontos[0][0] || x > pontos.at(-1)[0]) return null;
+  const i = pontos.findIndex((p) => p[0] >= x);
+  if (i <= 0) return pontos[0][1];
+  const [x0, y0] = pontos[i - 1], [x1, y1] = pontos[i];
+  return x1 === x0 ? y1 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+}
+
+let desenhoComparacao = null;
+
+function desenharComparacao() {
+  const d = estado.dados;
+  if (!estado.referencias || !d) return;
+  $("comparacao").hidden = false;
+  const host = $("grafico-comparacao");
+  host.replaceChildren();
+  desenhoComparacao = null;
+
+  const curvas = curvasComparacao(d);
+  $("legenda-comparacao").replaceChildren(...curvas.map((c) => el("li", {}, el("i", { class: `sw-cmp cmp-${c.id}` }), c.rotulo)));
+
+  const ultimo = d.serie.at(-1);
+  const agora = d.fase === "apurando" && ultimo && ultimo.pct_secoes < 100;
+  const W = Math.max(280, host.clientWidth);
+  const H = Math.round(Math.min(480, Math.max(260, W * 0.42)));
+  const M = { t: agora ? 26 : 10, r: 92, b: 44, l: 42 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+
+  let min = 0, max = 0;
+  for (const c of curvas) for (const [x, v] of c.pontos) if (x >= d.projecao_desde_pct) { min = Math.min(min, v); max = Math.max(max, v); }
+  const folga = Math.max(1, (max - min) * 0.1);
+  const lo = min - folga, hi = max + folga;
+  const X = (p) => M.l + (p / 100) * iw;
+  const Y = (v) => M.t + ((hi - v) / (hi - lo)) * ih;
+  const passo = passoNice(hi - lo, 5);
+  const ticksY = [];
+  for (let v = Math.ceil(lo / passo) * passo; v <= hi + 1e-9; v += passo) ticksY.push(Math.round(v * 100) / 100);
+  const casas = passo < 1 ? 1 : 0;
+
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0", focusable: "true" });
+  const ref = ultimo && d.fase !== "aguardando" ? ultimo.pct_secoes : 50;
+  const resumo = curvas.map((c) => { const v = valorEm(c.pontos, ref); return v == null ? null : `${c.rotulo}, ${sinal(v)} p.p.`; }).filter(Boolean);
+  svg.setAttribute("aria-label", `Gráfico da diferença entre Lula e Bolsonaro, em pontos percentuais, no mesmo ponto da apuração. Positivo é Lula à frente. Com ${pc(ref, 1)} das seções apuradas: ${resumo.join("; ")}. Use as setas do teclado para percorrer o gráfico.`);
+  svg.append(sv("defs", {}, sv("clipPath", { id: "recorte-cmp" }, sv("rect", { x: M.l, y: M.t, width: iw, height: ih }))));
+
+  if (agora) {
+    svg.append(
+      sv("rect", { class: "futuro", x: X(ultimo.pct_secoes), y: M.t, width: X(100) - X(ultimo.pct_secoes), height: ih }),
+      sv("line", { class: "agora", x1: X(ultimo.pct_secoes), x2: X(ultimo.pct_secoes), y1: M.t - 4, y2: M.t + ih }),
+    );
+    const rotAgora = sv("text", { x: X(ultimo.pct_secoes), y: M.t - 10, "text-anchor": "middle" });
+    rotAgora.textContent = "Agora";
+    svg.append(rotAgora);
+  }
+  for (const v of ticksY) {
+    if (v !== 0) svg.append(sv("line", { class: "grade", x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v) }));
+    const t = sv("text", { x: M.l - 6, y: Y(v) + 4, "text-anchor": "end" });
+    t.textContent = sinal(v, casas);
+    svg.append(t);
+  }
+  for (const p of [0, 25, 50, 75, 100]) {
+    const t = sv("text", { x: X(p), y: M.t + ih + 16, "text-anchor": p === 0 ? "start" : p === 100 ? "end" : "middle" });
+    t.textContent = `${p}%`;
+    svg.append(t);
+  }
+  const titulo = sv("text", { x: M.l + iw / 2, y: H - 6, "text-anchor": "middle" });
+  titulo.textContent = "Seções apuradas";
+  svg.append(
+    sv("line", { class: "eixo", x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih }),
+    sv("line", { class: "ref50", x1: M.l, x2: M.l + iw, y1: Y(0), y2: Y(0) }),
+    titulo,
+  );
+
+  // Referências primeiro, a de hoje por cima.
+  svg.append(sv("g", { "clip-path": "url(#recorte-cmp)" },
+    ...[...curvas].reverse().map((c) => sv("path", { class: `linha-cmp cmp-${c.id}`, d: c.pontos.filter(([x]) => x >= d.projecao_desde_pct).map(([x, v], k) => `${k ? "L" : "M"}${X(x).toFixed(1)},${Y(v).toFixed(1)}`).join("") }))));
+
+  // Rótulo no fim de cada linha, afastado dos vizinhos quando se encostam.
+  const fins = curvas.map((c) => {
+    const [x, v] = c.pontos.at(-1);
+    return { c, x: X(x) + 8, y: Math.min(M.t + ih - 2, Math.max(M.t + 8, Y(v) + 4)), v };
+  }).sort((a, b) => a.y - b.y);
+  fins.forEach((f, i) => {
+    const antes = fins.slice(0, i).filter((o) => Math.abs(o.x - f.x) < 76);
+    if (antes.length) f.y = Math.max(f.y, antes.at(-1).y + 13);
+  });
+  for (const f of fins) {
+    const t = sv("text", { class: `rot-cmp cmp-${f.c.id}`, x: f.x, y: f.y });
+    t.textContent = `${CURTO[f.c.id]} ${sinal(f.v)}`;
+    svg.append(t);
+    if (f.c.id === "atual") svg.append(sv("circle", { class: "ponto-cmp cmp-atual", cx: f.x - 8, cy: Y(f.v), r: 4.5 }));
+  }
+
+  const mira = sv("g", { visibility: "hidden", "pointer-events": "none" },
+    sv("line", { class: "mira", y1: M.t, y2: M.t + ih }),
+    ...curvas.map((c) => sv("circle", { class: `ponto-cmp cmp-${c.id}`, r: 4 })),
+  );
+  const alvo = sv("rect", { x: M.l, y: M.t, width: iw, height: ih, fill: "transparent" });
+  const dica = el("div", { class: "dica", hidden: true });
+  svg.append(mira, alvo);
+  host.append(svg, dica);
+  desenhoComparacao = { X, Y, M, W, mira, dica, svg, curvas, lo, hi };
+
+  const pos = (e) => {
+    const r = svg.getBoundingClientRect();
+    const p = (((e.clientX - r.left) * (W / r.width) - M.l) / iw) * 100;
+    definirSel(Math.min(100, Math.max(0, Math.round(p * 2) / 2)));
+  };
+  alvo.addEventListener("pointerdown", pos);
+  alvo.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse" || e.buttons || e.pointerType === "touch") pos(e); });
+  alvo.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") definirSel(null); });
+  svg.addEventListener("keydown", (e) => {
+    const atual = estado.sel ?? ref;
+    const passoTecla = { ArrowLeft: -0.5, ArrowRight: 0.5, PageDown: -5, PageUp: 5 }[e.key];
+    if (passoTecla) definirSel(Math.min(100, Math.max(0, Math.round((atual + passoTecla) * 2) / 2)));
+    else if (e.key === "Home") definirSel(0);
+    else if (e.key === "End" || e.key === "Escape") definirSel(null);
+    else return;
+    e.preventDefault();
+  });
+
+  desenharMiraComparacao();
+}
+
+function desenharMiraComparacao() {
+  const g = desenhoComparacao;
+  if (!g) return;
+  if (estado.sel == null) { g.mira.setAttribute("visibility", "hidden"); g.dica.hidden = true; return; }
+  const x = estado.sel;
+  const vals = g.curvas.map((c) => valorEm(c.pontos, x));
+  const [linha, ...circulos] = g.mira.children;
+  linha.setAttribute("x1", g.X(x)); linha.setAttribute("x2", g.X(x));
+  vals.forEach((v, k) => {
+    const ok = v != null && v >= g.lo && v <= g.hi;
+    circulos[k].setAttribute("visibility", ok ? "visible" : "hidden");
+    if (ok) { circulos[k].setAttribute("cx", g.X(x)); circulos[k].setAttribute("cy", g.Y(v)); }
+  });
+  g.mira.setAttribute("visibility", "visible");
+
+  g.dica.replaceChildren(
+    el("strong", { text: `${pc(x, x % 1 ? 1 : 0)} das seções apuradas` }),
+    el("div", { class: "dica-tab" }, ...g.curvas.flatMap((c, k) => [
+      el("span", { class: "dica-nome" }, el("i", { class: `sw-cmp cmp-${c.id}` }), c.rotulo),
+      el("span", { text: vals[k] == null ? "–" : `${sinal(vals[k])} p.p.` }),
+    ])),
+  );
+  g.dica.hidden = false;
+  const larguraSvg = g.svg.getBoundingClientRect().width;
+  const cx = g.X(x) * (larguraSvg / g.W);
+  const largura = g.dica.offsetWidth;
+  const direita = cx + 12 + largura <= larguraSvg;
+  g.dica.style.left = `${Math.max(0, direita ? cx + 12 : cx - 12 - largura)}px`;
+  g.dica.style.top = `${(g.M.t + 4) * (larguraSvg / g.W)}px`;
+}
+
+async function carregarReferencias() {
+  try {
+    const r = await fetch("dados/referencias.json");
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const { curvas } = await r.json();
+    if (!Array.isArray(curvas) || !curvas.every((c) => c.id && Array.isArray(c.pontos) && c.pontos.length)) throw new Error("referências em formato inesperado");
+    estado.referencias = { curvas };
+    desenharComparacao();
+  } catch (e) {
+    console.warn("Sem as curvas de referência:", e);
+  }
 }
 
 /* Estados */
@@ -725,6 +906,7 @@ function desenhar() {
   $("aviso-exemplo").hidden = !d.exemplo;
   desenharResposta();
   desenharGrafico();
+  desenharComparacao();
   desenharTabelaSerie();
   desenharMapa();
   desenharTabelaUfs();
@@ -765,13 +947,14 @@ function iniciar() {
     const w = Math.round(e.contentRect.width);
     if (w && w !== larguraAnterior) {
       larguraAnterior = w;
-      if (estado.dados) desenharGrafico();
+      if (estado.dados) { desenharGrafico(); desenharComparacao(); }
     }
   }).observe($("grafico"));
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && estado.proximo && Date.now() > estado.proximo - 1000) buscar();
   });
   setInterval(tique, 1000);
+  carregarReferencias();
   buscar();
 }
 

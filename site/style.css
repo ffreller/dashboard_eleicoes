@@ -233,6 +233,10 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .legenda li { display: inline-flex; align-items: center; gap: 8px; }
 .sw { display: block; width: 18px; height: 0; border-top: 2px solid var(--ink-3); }
 .sw-proj { border-top-style: dashed; }
+.cmp-atual { --c: var(--ink); --w: 2.5px; --dash: none; --bs: solid; }
+.cmp-1t2026 { --c: var(--ink-3); --w: 1.75px; --dash: none; --bs: solid; }
+.cmp-2t2022 { --c: var(--ink-3); --w: 1.75px; --dash: 6 4; --bs: dashed; }
+.sw-cmp { display: block; width: 22px; height: 0; border-top: var(--w) var(--bs) var(--c); }
 .sw-faixa { width: 22px; height: 10px; border: 0; background: color-mix(in srgb, var(--ink-3) 35%, transparent); }
 
 /* Gráfico */
@@ -253,6 +257,10 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .grafico .linha-proj { fill: none; stroke: var(--cor); stroke-width: 2; stroke-dasharray: 5 4; stroke-linecap: butt; }
 .grafico .ponto-proj { fill: var(--cor); stroke: var(--surf); stroke-width: 2; }
 .grafico .ponto-bruto { fill: var(--surf); stroke: var(--cor); stroke-width: 2.5; }
+.grafico .linha-cmp { fill: none; stroke: var(--c); stroke-width: var(--w); stroke-dasharray: var(--dash); stroke-linejoin: round; stroke-linecap: round; }
+.grafico .ponto-cmp { fill: var(--surf); stroke: var(--c); stroke-width: 2.25; }
+.grafico .rot-cmp { fill: var(--ink-2); font-weight: 600; paint-order: stroke; stroke: var(--surf); stroke-width: 3px; stroke-linejoin: round; }
+.grafico .rot-cmp.cmp-atual { fill: var(--ink); }
 .grafico .mira { stroke: var(--ink-3); stroke-width: 1; }
 .dica { position: absolute; z-index: 3; pointer-events: none; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surf); box-shadow: 0 4px 14px rgb(0 0 0 / 0.14); font-size: 0.8125rem; line-height: 1.35; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dica strong, .dica-sub { display: block; }
@@ -261,6 +269,7 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .dica-tab.com-final { grid-template-columns: auto auto auto; }
 .dica-cab { color: var(--ink-3); font-size: 0.6875rem; }
 .dica-nome { display: flex; align-items: center; gap: 6px; text-align: left; font-weight: 600; }
+.dica-nome .sw-cmp { width: 16px; }
 .dica-cor { width: 8px; height: 8px; border-radius: 50%; background: var(--cor); }
 
 /* Tabelas */
