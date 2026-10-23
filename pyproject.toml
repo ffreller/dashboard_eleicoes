@@ -1,0 +1,29 @@
+[project]
+name = "eleicao-2026"
+version = "0.1.0"
+description = "Apuração do 2º turno presidencial de 2026 com projeção do resultado final"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "numpy>=2.5.4",
+    "polars>=2.0.0",
+]
+
+[project.scripts]
+eleicao = "eleicao.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eleicao"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
