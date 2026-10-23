@@ -1,33 +1,21 @@
 import asyncio
+import dataclasses
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
-import numpy as np
 import polars as pl
 import pytest
-from tse_sintetico import ABERTURA, gravar_sintetico
+from tse_sintetico import ABERTURA, ModeloApurado, esperado, gravar_sintetico, rodar_ciclos, somas
 
 from eleicao import config
-from eleicao.modelo import recortes_apurados
-from eleicao.tipos import Apuracao, Base, Projecao
+from eleicao.tipos import Base
 from eleicao.tse.ao_vivo import ciclo, fase_da_contagem, rodar
-from eleicao.tse.apuracao import Estado, montar
+from eleicao.tse.apuracao import Estado
 from eleicao.tse.cliente import Cliente
 from eleicao.tse.falso import Falhas, TseFalso
 
 ELEICAO = config.ELEICOES[2026]
-
-
-class ModeloApurado:
-    """Estande do `eleicao.modelo.Modelo`: só reporta o apurado."""
-
-    def __init__(self, base: Base) -> None:
-        self.base = base
-
-    def projetar(self, ap: Apuracao) -> Projecao:
-        brasil, ufs = recortes_apurados(self.base, ap)
-        return Projecao(momento=ap.momento, brasil=brasil, ufs=ufs)
 
 
 @pytest.fixture
@@ -38,33 +26,6 @@ def mundo(tmp_path: Path):
         yield falso, pasta, cenario, tmp_path / "projecao.json"
 
 
-def esperado(cenario: pl.DataFrame, base: Base, relogio: datetime) -> dict:
-    feito = cenario.filter(pl.col("hora") <= relogio)
-    return {
-        "esq": feito["esq"].sum(), "dir": feito["dir"].sum(), "brancos": feito["brancos"].sum(),
-        "nulos": feito["nulos"].sum(), "comparecimento": feito["comparecimento"].sum(),
-        "aptos": feito["aptos"].sum(), "secoes": feito.height, "totalizada": feito.height,
-    }
-
-
-def somas(ap) -> dict:
-    return {
-        "esq": ap.esq.sum(), "dir": ap.dir.sum(), "brancos": ap.brancos.sum(), "nulos": ap.nulos.sum(),
-        "comparecimento": ap.comparecimento.sum(), "aptos": ap.aptos.sum(), "secoes": ap.secoes.sum(),
-        "totalizada": ap.totalizada.sum(),
-    }
-
-
-async def rodar_ciclos(url_base: str, base: Base, estado: Estado, n: int, **cliente) -> list:
-    div = ELEICAO.divulgacao.__class__(**{**ELEICAO.divulgacao.__dict__, "url_base": url_base})
-    montagens = []
-    async with Cliente(**cliente) as c:
-        for _ in range(n):
-            await ciclo(c, div, ELEICAO, estado)
-            montagens.append(montar(base, estado, datetime(2026, 10, 25, 12)))
-    return montagens
-
-
 @pytest.mark.parametrize("minutos", [60, 130, 400])
 def test_apuracao_fecha_com_a_soma_do_cenario(mundo, minutos):
     falso, pasta, cenario, _ = mundo
@@ -73,18 +34,17 @@ def test_apuracao_fecha_com_a_soma_do_cenario(mundo, minutos):
     falso.relogio.fixar(relogio)
     [montagem] = asyncio.run(rodar_ciclos(falso.url_base, base, Estado(), 1))
     assert montagem.secoes_fora_da_base == 0 and montagem.municipios_fora_da_base == 0
-    assert somas(montagem.apuracao) == esperado(cenario, base, relogio)
+    assert somas(montagem.apuracao) == esperado(cenario, relogio)
     assert montagem.apuracao.momento == cenario.filter(pl.col("hora") <= relogio)["hora"].max()
 
 
 def test_segundo_ciclo_so_baixa_o_que_mudou(mundo):
-    falso, pasta, _, _ = mundo
-    base = Base.ler(pasta)
+    falso = mundo[0]
     falso.relogio.fixar(ABERTURA + timedelta(minutes=90))
 
     async def duas_vezes():
-        div = ELEICAO.divulgacao.__class__(**{**ELEICAO.divulgacao.__dict__, "url_base": falso.url_base})
-        async with Cliente() as c:
+        div = dataclasses.replace(ELEICAO.divulgacao, url_base=falso.url_base)
+        async with Cliente(por_segundo=1e6) as c:
             await ciclo(c, div, ELEICAO, estado := Estado())
             primeiro = c.retirar_medidas()
             await ciclo(c, div, ELEICAO, estado)
@@ -101,7 +61,7 @@ def test_rodar_grava_fase_e_percentual_de_secoes(mundo, minutos, fase, pct):
     falso, pasta, cenario, destino = mundo
     relogio = ABERTURA + timedelta(minutes=minutos)
     falso.relogio.fixar(relogio)
-    rodar(2026, 0, falso.url_base, pasta=pasta, destino=destino, ciclos=2, modelo=ModeloApurado)
+    rodar(2026, 0, falso.url_base, pasta=pasta, destino=destino, ciclos=2, modelo=ModeloApurado, por_segundo=1e6)
     doc = json.loads(destino.read_text(encoding="utf-8"))
     assert doc["fase"] == fase
     if fase == "aguardando":
@@ -129,7 +89,7 @@ def test_com_falhas_o_laco_sobrevive_nunca_regride_e_converge(mundo):
 
     falso.falhas = None
     final = asyncio.run(rodar_ciclos(falso.url_base, base, estado, 3, espera=0.001))
-    assert somas(final[-1].apuracao) == esperado(cenario, base, ABERTURA + timedelta(minutes=400))
+    assert somas(final[-1].apuracao) == esperado(cenario, ABERTURA + timedelta(minutes=400))
     assert fase_da_contagem(final[-1].apuracao, estado) == "encerrada"
 
 
