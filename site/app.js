@@ -334,6 +334,7 @@ function desenharGrafico() {
   const serie = d.serie;
   host.replaceChildren();
   desenhoGrafico = null;
+  $("legenda").hidden = !serie.length;
   if (!serie.length) {
     host.append(el("p", { class: "leitura-vazia", text: "O gráfico aparece quando os primeiros resultados chegarem." }));
     return;
@@ -341,7 +342,7 @@ function desenharGrafico() {
 
   const nm = nomes(d);
   const W = Math.max(280, host.clientWidth);
-  const H = Math.round(Math.min(560, Math.max(300, W * 0.68)));
+  const H = Math.round(Math.min(560, Math.max(300, W * 0.45)));
   const ultimo = serie.at(-1);
   const agora = d.fase === "apurando" && ultimo.pct_secoes < 100;
   const M = { t: agora ? 26 : 10, r: 14, b: 44, l: 42 };
@@ -358,7 +359,7 @@ function desenharGrafico() {
   const X = (p) => M.l + (p / 100) * iw;
   const Y = (v) => M.t + ((hi - v) / (hi - lo)) * ih;
 
-  const passo = passoNice(hi - lo, 3);
+  const passo = passoNice(hi - lo, 4);
   const ticksY = [];
   for (let k = -Math.floor(desvio / passo + 1e-9); k <= Math.floor(desvio / passo + 1e-9); k++) ticksY.push(Math.round((50 + k * passo) * 100) / 100);
 
@@ -408,6 +409,7 @@ function desenharGrafico() {
   const igual = (v) => v;
   const contagem = (f) => segmentos(serie, (q) => q.apurado).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
   const caminho = caminhoAteFim(ultimo);
+  for (const li of $("legenda").querySelectorAll("[data-proj]")) li.hidden = !caminho.length;
   const fimLinha = (f) => caminho.length ? "M" + caminho.map((c) => pto(c.x, f(c.centro))).join("L") : "";
   const fimFaixa = (f) => caminho.length
     ? `M${caminho.map((c) => pto(c.x, f(c.alto))).join("L")}L${caminho.map((c) => pto(c.x, f(c.baixo))).reverse().join("L")}Z`
