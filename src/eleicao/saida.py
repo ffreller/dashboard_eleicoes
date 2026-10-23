@@ -47,6 +47,17 @@ def _ponto(momento: datetime, r: Recorte) -> dict:
     }
 
 
+def ler_validacao(pasta: Path, anos: tuple[int, ...] = (2022, 2018)) -> dict | None:
+    """Resumo dos ensaios gravados por `eleicao ensaio`, no formato que a página mostra."""
+    ensaios = []
+    for ano in anos:
+        arq = pasta / f"{ano}.json"
+        if arq.exists():
+            r = json.loads(arq.read_text(encoding="utf-8"))
+            ensaios.append({k: r[k] for k in ("eleicao", "desde_pct", "erro_medio_pp", "erro_max_pp", "cobertura_faixa", "erro_medio_apurado_pp")})
+    return {"ensaios": ensaios} if ensaios else None
+
+
 def _referencias_por_uf(base: Base) -> dict[str, tuple[float, float]]:
     """Por UF: % da esquerda entre os dois no 1º turno e no 2º turno anterior (ponderado pelos válidos)."""
     s = base.secoes

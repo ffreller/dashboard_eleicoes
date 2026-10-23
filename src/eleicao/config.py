@@ -96,4 +96,14 @@ ELEICOES = {
         numeros_b=(13, 17),
         divulgacao=Divulgacao(ciclo="ele2022", eleicao=545, pleito=407),
     ),
+    # Segundo ensaio, independente do primeiro. A divulgação de 2018 tinha outro formato; os códigos
+    # abaixo só nomeiam os arquivos do TSE falso.
+    2018: Eleicao(
+        ano=2018,
+        ano_b=2014,
+        esquerda=Candidato("haddad", "Fernando Haddad", 13, "PT"),
+        direita=Candidato("bolsonaro", "Jair Bolsonaro", 17, "PSL"),
+        numeros_b=(13, 45),
+        divulgacao=Divulgacao(ciclo="ele2018", eleicao=296, pleito=296),
+    ),
 }

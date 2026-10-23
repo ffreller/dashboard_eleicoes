@@ -316,7 +316,6 @@ th[aria-sort="ascending"] .seta, th[aria-sort="descending"] .seta { opacity: 1; 
 .passos strong { color: var(--ink); }
 .detalhes { margin-top: 16px; border-top: 1px solid var(--line); }
 .detalhes-corpo { padding-bottom: 8px; }
-.todo { margin-top: 8px; padding: 8px 10px; border: 1px dashed var(--aviso-borda); border-radius: 8px; background: var(--aviso-bg); color: var(--aviso-ink); font-size: 0.875rem; }
 .validacao { margin-top: 8px; padding-top: 4px; border-top: 1px solid var(--line); }
 .validacao p { margin-top: 6px; color: var(--ink-2); }
 

@@ -136,12 +136,29 @@
 
     <details class="detalhes" id="detalhes-tecnicos">
       <summary>Detalhes técnicos</summary>
-      <!-- TODO(lead): preencher os quatro blocos abaixo antes de publicar. -->
       <div class="detalhes-corpo">
-        <p class="todo"><strong>TODO (lead):</strong> descrever o modelo em termos estatísticos (como as seções são agrupadas, o que é estimado em cada grupo, como o erro é propagado).</p>
-        <p class="todo"><strong>TODO (lead):</strong> explicar como a faixa é calculada e o que o nível dela significa.</p>
-        <p class="todo"><strong>TODO (lead):</strong> listar as limitações conhecidas (seções atrasadas, voto no exterior, mudanças de local de votação).</p>
-        <p class="todo"><strong>TODO (lead):</strong> apontar onde está o código e os arquivos de dados usados.</p>
+        <p><strong>Referências de cada seção.</strong> Para cada uma das cerca de 499 mil seções (urnas), a página guarda o
+          voto de Lula, de Flávio e dos demais candidatos no 1º turno de 2026, na própria seção, e a fração de Lula no 2º turno
+          de 2022. Como seções mudam de número e de local entre eleições, a de 2022 é achada por etapas: a mesma seção no
+          mesmo local (89% do eleitorado), o mesmo local pelo nome dentro do município (6%), e então a zona ou o município.</p>
+        <p><strong>O que é medido.</strong> A cada ciclo, a página lê os arquivos públicos da divulgação do TSE: quais seções
+          já foram totalizadas e o resultado de cada município. Em cada município que já começou, ela compara a fração de
+          Lula entre os dois candidatos no que foi apurado com a fração das mesmas seções no 1º turno (em escala logística).
+          Essa diferença é a mudança de voto do município.</p>
+        <p><strong>Como a mudança é estendida.</strong> Uma regressão ponderada explica a mudança dos municípios pelo perfil
+          das seções: voto nos demais candidatos no 1º turno, diferença entre 2022 e o 1º turno de 2026, inclinação política,
+          abstenção, brancos e nulos, capital e porte do município, com ajustes por região e por estado puxados para a média
+          nacional quando há poucos dados. Cada seção que falta recebe o seu voto do 1º turno mais a mudança prevista para o
+          seu perfil, mais o desvio próprio do seu município, proporcional ao quanto dele já foi apurado. O número de votos
+          válidos que falta vem do 1º turno, corrigido pela variação de comparecimento medida no município e no estado.</p>
+        <p><strong>A faixa.</strong> A página sorteia 200 cenários: coeficientes da regressão dentro do seu erro, desvios de
+          cada município e um choque comum para tudo o que falta, no país e em cada estado. Esse choque representa o risco de
+          as seções que chegam por último terem mudado de voto de um jeito que as primeiras não mostram, que é a principal
+          fonte de erro nos testes. A faixa vai do 2,5º ao 97,5º percentil dos cenários.</p>
+        <p><strong>Limitações.</strong> O modelo supõe que lugares parecidos mudam de voto de modo parecido. Uma virada
+          concentrada em um tipo de lugar que ainda não começou a apurar só aparece quando ele chega. O voto no exterior chega
+          tarde e tem referências mais fracas. Os arquivos de seções e de resultados do TSE são gerados em momentos
+          diferentes; quando divergem, a página usa o resultado e ajusta a referência na mesma proporção.</p>
       </div>
     </details>
 

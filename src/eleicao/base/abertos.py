@@ -1,6 +1,7 @@
 """Leitura dos arquivos de dados abertos do TSE (votação e detalhe da apuração por seção, cargo Presidente).
 
-Os CSVs vêm zipados, em latin-1, separados por ";". Cada um é convertido uma vez para parquet em
+Os CSVs vêm zipados, em latin-1, separados por ";". Colunas que um ano não publica (2014 não tem
+nome nem endereço do local) viram nulas. Cada um é convertido uma vez para parquet em
 data/raw/parquet/, só com as linhas de Presidente e as colunas usadas, e lido de lá nas vezes seguintes.
 """
 
@@ -82,10 +83,14 @@ def _parquet(nome: str, zip_path: Path, membro: str, colunas: dict) -> pl.DataFr
     if not destino.exists():
         destino.parent.mkdir(parents=True, exist_ok=True)
         csv = _csv_utf8(zip_path, membro)
+        lf = pl.scan_csv(csv, separator=";", infer_schema=False)
+        presentes = set(lf.collect_schema().names())
         lf = (
-            pl.scan_csv(csv, separator=";", infer_schema=False)
-            .filter(pl.col("CD_CARGO").cast(pl.Int32) == 1)
-            .select(pl.col(orig).cast(tipo).alias(novo) for orig, (novo, tipo) in colunas.items())
+            lf.filter(pl.col("CD_CARGO").cast(pl.Int32) == 1)
+            .select(
+                (pl.col(orig) if orig in presentes else pl.lit(None)).cast(tipo).alias(novo)
+                for orig, (novo, tipo) in colunas.items()
+            )
             .with_columns(pl.col("uf").str.to_lowercase())
         )
         lf.sink_parquet(destino)

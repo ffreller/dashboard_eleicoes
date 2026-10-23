@@ -8,10 +8,10 @@ def main() -> None:
     sub = p.add_subparsers(dest="comando", required=True)
 
     b = sub.add_parser("base", help="monta a base de seções a partir dos dados abertos do TSE")
-    b.add_argument("--ano", type=int, default=2026, choices=(2026, 2022))
+    b.add_argument("--ano", type=int, default=2026, choices=(2026, 2022, 2018))
 
     e = sub.add_parser("ensaio", help="reproduz um 2º turno passado na ordem real de chegada e mede o erro")
-    e.add_argument("--ano", type=int, default=2022, choices=(2022,))
+    e.add_argument("--ano", type=int, default=2022, choices=(2022, 2018))
 
     v = sub.add_parser("ao-vivo", help="acompanha a divulgação do TSE e grava site/dados/projecao.json")
     v.add_argument("--ano", type=int, default=2026, choices=(2026, 2022))

@@ -1383,9 +1383,23 @@
   }
  ],
  "validacao": {
-  "eleicao": "2º turno de 2022",
-  "erro_medio_pp": 0.2,
-  "desde_pct": 5.0,
-  "cobertura_faixa": 0.95
+  "ensaios": [
+   {
+    "eleicao": "2º turno de 2022",
+    "desde_pct": 5.0,
+    "erro_medio_pp": 0.07,
+    "erro_max_pp": 0.18,
+    "cobertura_faixa": 1.0,
+    "erro_medio_apurado_pp": 1.68
+   },
+   {
+    "eleicao": "2º turno de 2018",
+    "desde_pct": 5.0,
+    "erro_medio_pp": 0.1,
+    "erro_max_pp": 0.2,
+    "cobertura_faixa": 1.0,
+    "erro_medio_apurado_pp": 2.0
+   }
+  ]
  }
 }

@@ -649,15 +649,12 @@ function desenharValidacao() {
 }
 
 function textoValidacao(d) {
-  const v = d.validacao;
-  if (!v) return null;
-  const partes = [`Rodamos o mesmo método sobre o ${v.eleicao || "2º turno de 2022"}, recebendo as seções na ordem real em que chegaram, para ver se ele teria acertado.`];
-  if (v.erro_medio_pp != null) {
-    const desde = v.desde_pct != null ? ` a partir de ${n(v.desde_pct, 0)}% das seções apuradas` : "";
-    partes.push(`Na média,${desde} a projeção ficou a ${n(v.erro_medio_pp, 1)} ponto percentual do resultado final.`);
-  }
-  if (v.cobertura_faixa != null) {
-    partes.push(`A faixa de ${n(d.nivel_faixa, 0)}% continha o resultado final em ${n(v.cobertura_faixa * 100, 0)}% dos momentos testados.`);
+  const ensaios = d.validacao && d.validacao.ensaios;
+  if (!ensaios || !ensaios.length) return null;
+  const nomes = ensaios.map((e) => `o ${e.eleicao}`).join(" e ");
+  const partes = [`Rodamos o mesmo método sobre ${nomes}, recebendo as seções na ordem real em que chegaram e comparando cada projeção com o resultado final.`];
+  for (const e of ensaios) {
+    partes.push(`No ${e.eleicao}, a partir de ${n(e.desde_pct, 0)}% das seções apuradas, a projeção errou em média ${n(e.erro_medio_pp, 2)} ponto (no máximo ${n(e.erro_max_pp, 2)}), enquanto a contagem bruta estava em média ${n(e.erro_medio_apurado_pp, 1)} pontos longe do final. A faixa de ${n(d.nivel_faixa, 0)}% continha o resultado final em ${n(e.cobertura_faixa * 100, 0)}% dos momentos testados.`);
   }
   return partes.join(" ");
 }

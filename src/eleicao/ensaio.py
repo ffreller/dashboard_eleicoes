@@ -125,3 +125,28 @@ def ensaiar(ano: int) -> None:
     doc = {"eleicao": f"2º turno de {ano}", **resumo(real), "por_ordem": {o: resumo(tudo.filter(pl.col("ordem") == o)) for o in ORDENS}}
     (pasta / f"{ano}.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(doc, ensure_ascii=False))
+
+
+def cenario_sintetico(base: Base, swing: float, semente: int = 0) -> pl.DataFrame:
+    """Um 2º turno inventado sobre a Base: cada seção recebe a fração da esquerda do 1º turno mais
+    `swing` (logit) e um ruído por município e por seção; os demais candidatos se dividem pela mesma
+    regra; a hora de chegada é a do 1º turno com um atraso sorteado. Serve aos testes e ao ensaio
+    ponta a ponta no universo real de 2026, onde o 2º turno ainda não aconteceu."""
+    rng = np.random.default_rng(semente)
+    s = base.secoes
+    a_esq, a_dir, a_out = (s[c].to_numpy().astype(float) for c in ("a_esq", "a_dir", "a_outros"))
+    validos_1t = a_esq + a_dir + a_out
+    p1 = (a_esq + 1) / (a_esq + a_dir + 2)
+    ruido = 0.03 * rng.standard_normal(base.n_municipios)[base.mun_idx] + 0.05 * rng.standard_normal(base.n_secoes)
+    p2 = 1 / (1 + np.exp(-(np.log(p1 / (1 - p1)) + swing + ruido)))
+    validos = rng.binomial(validos_1t.astype(np.int64), 0.98)
+    esq = rng.binomial(validos, p2)
+    compar = s["a_comparecimento"].to_numpy()
+    hora = s["a_hora"].to_numpy() + (rng.exponential(300, base.n_secoes) * 1e6).astype("timedelta64[us]")
+    return pl.DataFrame({
+        "uf": s["uf"], "mun": s["mun"], "zona": s["zona"], "secao": s["secao"],
+        "hora": hora, "aptos": s["aptos"], "comparecimento": compar.astype(np.int32),
+        "esq": esq.astype(np.int32), "dir": (validos - esq).astype(np.int32),
+        "brancos": ((compar - validos) // 2).clip(0).astype(np.int32),
+        "nulos": (compar - validos - (compar - validos) // 2).clip(0).astype(np.int32),
+    })
