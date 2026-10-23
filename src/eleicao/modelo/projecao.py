@@ -38,14 +38,14 @@ class Parametros:
     sd_regiao: float = 0.04
     sd_uf: float = 0.03
     sd_municipio: float = 0.024
-    """Desvio do swing de um município em relação ao previsto pelo perfil e pela UF."""
+    """Pisos dos desvios de região, UF e município em relação ao previsto; a apuração pode aumentá-los."""
     sobredispersao: float = 3.0
     """Multiplica a variância binomial do swing medido em poucas seções."""
     peso_validos: float = 5000.0
     """Votos com que a razão de válidos da UF entra na estimativa de cada município."""
     sd_validos: float = 0.018
-    sd_ordem_nacional: float = 0.01
-    sd_ordem_uf: float = 0.015
+    sd_ordem_nacional: float = 0.015
+    sd_ordem_uf: float = 0.02
     """Choques comuns no swing de tudo o que falta (no Brasil e em cada UF): o risco de as seções que
     chegam por último mudarem de voto de um jeito que as primeiras não mostram."""
     sorteios: int = 200
@@ -97,7 +97,7 @@ class Modelo:
         self.reg_idx = np.array([regioes.index(REGIAO[u]) for u in uf_mun])
         self.n_reg, self.n_uf = len(regioes), len(self.ufs)
 
-        k = perfil.shape[1]
+        k = self.n_perfil = perfil.shape[1]
         sd = np.concatenate([
             parametros.sd_coef, [parametros.sd_nacional],
             np.full(self.n_reg, parametros.sd_regiao), np.full(self.n_uf, parametros.sd_uf),
@@ -133,6 +133,51 @@ class Modelo:
         ufs = {u: com_faixa(ufs[u], centro[1 + j], sorteios[:, 1 + j]) for j, u in enumerate(nome_uf)}
         return Projecao(momento=ap.momento, brasil=brasil, ufs=ufs)
 
+    def _ajustar(self, z: np.ndarray, swing: np.ndarray, var_amostra: np.ndarray, mun: np.ndarray):
+        """Regressão ponderada com priori normal. As variâncias entre municípios, UFs e regiões partem dos
+        valores de `Parametros` (o piso) e são reestimadas com a dispersão observada na própria apuração:
+        uma eleição em que os estados divergem muito precisa de faixas mais largas para os que faltam."""
+        par, k = self.par, self.n_perfil
+        fatia_reg = slice(k + 1, k + 1 + self.n_reg)
+        fatia_uf = slice(k + 1 + self.n_reg, k + 1 + self.n_reg + self.n_uf)
+        n_uf = np.bincount(self.uf_idx[mun], minlength=self.n_uf)
+        n_reg = np.bincount(self.reg_idx[mun], minlength=self.n_reg)
+        var_m, sd_reg, sd_uf = par.sd_municipio**2, par.sd_regiao, par.sd_uf
+        for _ in range(3):
+            prec = self.precisao_priori.copy()
+            prec[fatia_reg], prec[fatia_uf] = 1 / sd_reg**2, 1 / sd_uf**2
+            w = 1 / (var_m + var_amostra)
+            cov = np.linalg.inv(z.T @ (z * w[:, None]) + np.diag(prec))
+            theta = cov @ (z.T @ (w * swing))
+            resid = swing - z @ theta
+            var_m = max(par.sd_municipio**2, np.average(resid**2 - var_amostra, weights=w**2))
+            pv = np.diag(cov)
+            com_dados = n_uf >= 5
+            if com_dados.sum() >= 3:
+                sd_uf = max(par.sd_uf, np.sqrt(np.mean(theta[fatia_uf][com_dados] ** 2 + pv[fatia_uf][com_dados])))
+            com_dados = n_reg >= 5
+            if com_dados.sum() >= 2:
+                sd_reg = max(par.sd_regiao, np.sqrt(np.mean(theta[fatia_reg][com_dados] ** 2 + pv[fatia_reg][com_dados])))
+        return theta, cov, var_m
+
+    def _swing_uniforme(self, w_sec: np.ndarray, alvo: np.ndarray, mun: np.ndarray) -> np.ndarray:
+        """Para cada município em `mun`, o swing que, somado ao logit de cada seção apurada (pesos
+        `w_sec`), reproduz a fração `alvo` do apurado. Diferença de logits agregados não serve: com
+        mudanças grandes e seções heterogêneas ela erra, e o erro passa para as seções que faltam."""
+        mi, nm = self.mi, self.base.n_municipios
+        dentro = w_sec > 0
+        sec_mi, sec_w, sec_lg = mi[dentro], w_sec[dentro], self.lg_a[dentro]
+        total = np.bincount(sec_mi, sec_w, nm)[mun]
+        base_agg = np.bincount(sec_mi, sec_w * expit(sec_lg), nm)[mun] / total
+        swing = np.zeros(nm)
+        swing[mun] = logit(alvo) - logit(base_agg.clip(1e-6, 1 - 1e-6))
+        for _ in range(8):
+            p = expit(sec_lg + swing[sec_mi])
+            f = np.bincount(sec_mi, sec_w * p, nm)[mun] / total - alvo
+            df = np.bincount(sec_mi, sec_w * p * (1 - p), nm)[mun] / total
+            swing[mun] -= f / np.maximum(df, 1e-9)
+        return swing[mun]
+
     def _estimar(self, ap: Apuracao) -> tuple[np.ndarray, np.ndarray, "Previsao"] | None:
         """% da esquerda projetado [Brasil, UFs...], os sorteios (linhas) no mesmo formato e a previsão
         central seção a seção."""
@@ -163,17 +208,12 @@ class Modelo:
         mun = np.flatnonzero(ativo)
 
         p_obs = ((e_obs + 0.5) / (v2 + 1))[mun]
-        swing = logit(p_obs) - logit((ac_esq[mun] + 0.5) / (ac_esq[mun] + ac_dir[mun] + 1))
         w_sec = peso_c * self.v1
+        swing = self._swing_uniforme(w_sec, p_obs, mun)
         perfil_m = np.column_stack([np.bincount(mi, w_sec * x, nm)[mun] for x in self.perfil.T]) / v1c[mun, None]
         var_amostra = par.sobredispersao / (v2[mun] * p_obs * (1 - p_obs))
-        var_m = par.sd_municipio**2
-        w = 1 / (var_m + var_amostra)
-
         z = self._efeitos(perfil_m, mun)
-        info = z.T @ (z * w[:, None]) + np.diag(self.precisao_priori)
-        cov = np.linalg.inv(info)
-        theta = cov @ (z.T @ (w * swing))
+        theta, cov, var_m = self._ajustar(z, swing, var_amostra, mun)
         resid = swing - z @ theta
         encolhe = var_m / (var_m + var_amostra)
         desvio = np.zeros(nm)
