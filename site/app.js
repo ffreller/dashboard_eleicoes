@@ -208,6 +208,24 @@ function frase(d, sit, nm) {
 
 const ROTULO_FASE = { aguardando: "Aguardando", apurando: "Apurando", encerrada: "Encerrada" };
 
+// Eixo simétrico em torno de 50, para que o 50 fique no meio e a faixa seja legível.
+function escalaIncerteza({ baixo, alto }) {
+  const meia = Math.max(0.5, 1.2 * Math.max(Math.abs(baixo - 50), Math.abs(alto - 50)));
+  const passo = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10].filter((p) => p <= meia).at(-1);
+  const casas = [0, 1, 2].find((c) => Math.abs(passo * 10 ** c - Math.round(passo * 10 ** c)) < 1e-9);
+  return {
+    pos: (v) => ((v - (50 - meia)) / (2 * meia)) * 100,
+    ticks: [50 - passo, 50, 50 + passo].map((v) => ({ v, rot: pc(v, v === 50 ? 0 : casas) })),
+  };
+}
+
+function posicionarTrilha(trilha, baixo, alto, centro, pos) {
+  const a = Math.max(0, pos(baixo)), b = Math.min(100, pos(alto));
+  trilha.style.setProperty("--a", `${a}%`);
+  trilha.style.setProperty("--w", `${Math.max(0, b - a)}%`);
+  trilha.style.setProperty("--c", `${pos(centro)}%`);
+}
+
 function desenharResposta() {
   const d = estado.dados;
   const sit = situacao(d);
@@ -216,16 +234,19 @@ function desenharResposta() {
   for (const e of document.querySelectorAll("[data-nome]")) e.textContent = nm[e.dataset.nome];
   $("fase").textContent = ROTULO_FASE[d.fase];
   $("fase").dataset.fase = d.fase;
-  $("t-evolucao").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem e projeção";
+  $("t-contagem").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem até agora";
 
   const u = sit.u;
   const apurado = sit.tipo === "encerrada" ? (u.apurado ?? u.projecao?.centro) : u?.apurado;
   const temNumeros = sit.tipo !== "aguardando" && apurado != null;
-  $("blocos").hidden = !temNumeros;
+  $("cartoes").hidden = !temNumeros;
   if (temNumeros) {
     pctHtml($("pct-esq"), pc(apurado));
     pctHtml($("pct-dir"), pc(100 - apurado));
-    pctHtml($("apuradas"), pc(u.pct_secoes, 2));
+    $("barra-contagem").style.setProperty("--p", `${apurado}%`);
+    const margem = Math.abs(2 * apurado - 100);
+    $("vantagem").textContent = margem < 0.005 ? "Empate" : `${apurado > 50 ? nm.esq : nm.dir} +${n(margem, 2)} p.p.`;
+    $("apuradas").textContent = pc(u.pct_secoes, u.pct_secoes % 1 ? 1 : 0);
     $("progresso").style.setProperty("--p", `${u.pct_secoes}%`);
   }
 
@@ -233,22 +254,25 @@ function desenharResposta() {
 
   const proj = sit.tipo === "cruza" || sit.tipo === "um-lado" ? u.projecao : null;
   const aguarde = $("proj-aguarde");
-  $("bloco-projecao").hidden = d.fase === "encerrada";
+  $("cartao-projecao").hidden = d.fase === "encerrada";
+  $("cartoes").classList.toggle("so-contagem", d.fase === "encerrada");
   aguarde.hidden = !!proj;
   aguarde.textContent = `Aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas.`;
-  $("proj-placar").hidden = !proj;
+  $("proj").hidden = !proj;
+  const ch = proj && chanceDe(d, u);
+  $("chance").hidden = !ch;
   if (proj) {
     pctHtml($("proj-pct-esq"), pc(proj.centro));
     pctHtml($("proj-pct-dir"), pc(100 - proj.centro));
-    $("faixa-esq").textContent = `faixa: ${n(proj.baixo)} a ${n(proj.alto)}`;
-    $("faixa-dir").textContent = `faixa: ${n(100 - proj.alto)} a ${n(100 - proj.baixo)}`;
-    const ch = chanceDe(d, u);
-    $("chance").hidden = !ch;
-    if (ch) {
-      $("chance-esq").textContent = ch.esq;
-      $("chance-dir").textContent = ch.dir;
-      $("chance-barra").style.setProperty("--p", `${u.projecao.chance}%`);
-    }
+    const { pos, ticks } = escalaIncerteza(proj);
+    posicionarTrilha($("trilha-esq"), proj.baixo, proj.alto, proj.centro, pos);
+    posicionarTrilha($("trilha-dir"), 100 - proj.alto, 100 - proj.baixo, 100 - proj.centro, pos);
+    $("eixo").replaceChildren(...ticks.map((t) => el("span", { style: `--x:${pos(t.v)}%`, text: t.rot })));
+  }
+  if (ch) {
+    $("chance-esq").textContent = ch.esq;
+    $("chance-dir").textContent = ch.dir;
+    $("chance-barra").style.setProperty("--p", `${u.projecao.chance}%`);
   }
 }
 
@@ -523,7 +547,7 @@ function desenharTabelaSerie() {
   corpo.replaceChildren(el("table", {},
     el("caption", { class: "vh", text: `Evolução da contagem e da projeção, em % de ${nm.esq} nos votos válidos` }),
     el("thead", {}, el("tr", {},
-      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
+      ...["Hora", "% das seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
     el("tbody", {}, linhas)));
 }
 
@@ -602,7 +626,7 @@ function detalheUf(u, nm) {
 
 const COLUNAS = [
   { chave: "nome", rot: () => "Estado", valor: (u) => u.nome },
-  { chave: "pct_secoes", rot: () => "Seções apuradas", valor: (u) => u.pct_secoes },
+  { chave: "pct_secoes", rot: () => "% das seções apuradas", valor: (u) => u.pct_secoes },
   { chave: "apurado", rot: (nm) => `Contagem (${nm.esq} %)`, valor: (u) => u.apurado },
   { chave: "projecao", rot: (nm) => `Projeção (${nm.esq} %)`, valor: (u) => u.projecao?.centro },
   { chave: "faixa", rot: () => "Faixa da projeção", valor: (u) => u.projecao?.baixo },

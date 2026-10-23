@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 <script>
 (function () {
   try {
@@ -44,73 +44,77 @@
 
 <main id="principal" class="miolo">
   <div class="status" id="barra-status">
-    <p id="status" role="status" aria-live="polite">Carregando os dados…</p>
+    <div class="status-esq">
+      <span id="fase" class="fase"></span>
+      <p id="status" role="status" aria-live="polite">Carregando os dados…</p>
+    </div>
     <p id="proxima" class="proxima"></p>
   </div>
   <p id="alerta" class="alerta" hidden></p>
 
-  <section class="cartao" id="evolucao" role="tabpanel" aria-labelledby="aba-evolucao">
-    <div class="hero-topo">
-      <h2 id="t-evolucao">Contagem e projeção</h2>
-      <span id="fase" class="fase"></span>
-    </div>
+  <section id="evolucao" role="tabpanel" aria-labelledby="aba-evolucao">
+    <p id="frase" class="frase"></p>
 
-    <div class="blocos" id="blocos" hidden>
-      <div class="bloco bloco-heroi" id="bloco-projecao">
-        <h3 class="rotulo">Projeção do resultado final</h3>
-        <div class="placar" id="proj-placar">
-          <div class="lado lado-esq">
+    <div class="cartoes" id="cartoes" hidden>
+      <div class="cartao" id="cartao-contagem">
+        <h2 id="t-contagem">Contagem até agora</h2>
+        <div class="placar">
+          <div class="lado">
             <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
-            <span class="pct" id="proj-pct-esq"></span>
-            <span class="faixa-txt" id="faixa-esq"></span>
+            <span class="pct" id="pct-esq"></span>
           </div>
-          <div class="lado lado-dir">
-            <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
-            <span class="pct" id="proj-pct-dir"></span>
-            <span class="faixa-txt" id="faixa-dir"></span>
+          <div class="lado">
+            <span class="nome"><i class="ponto ponto-dir" aria-hidden="true"></i><span data-nome="dir"></span></span>
+            <span class="pct" id="pct-dir"></span>
           </div>
         </div>
-        <div class="chance" id="chance" hidden>
-          <p class="chance-rot">Chance de vencer</p>
-          <div class="chance-barra" aria-hidden="true"><span id="chance-barra"></span></div>
-          <div class="chance-vals">
-            <b id="chance-esq"></b>
-            <b id="chance-dir"></b>
-          </div>
+        <div class="barra" aria-hidden="true"><span id="barra-contagem"></span></div>
+        <p class="vantagem" id="vantagem"></p>
+        <div class="apurado">
+          <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
+          <p><b id="apuradas"></b> apurado</p>
+        </div>
+      </div>
+
+      <div class="cartao" id="cartao-projecao">
+        <div class="cartao-topo">
+          <h2>Projeção final</h2>
+          <span class="chip">Estimativa</span>
+        </div>
+        <div class="proj" id="proj">
+          <span class="nome ne"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
+          <span class="pct pe" id="proj-pct-esq"></span>
+          <span class="nome nd"><i class="ponto ponto-dir" aria-hidden="true"></i><span data-nome="dir"></span></span>
+          <span class="pct pd" id="proj-pct-dir"></span>
+          <p class="tit">Incerteza · escala ampliada</p>
+          <div class="trilha te cor-esq" id="trilha-esq"><span class="faixa"></span><i class="centro"></i></div>
+          <div class="trilha td cor-dir" id="trilha-dir"><span class="faixa"></span><i class="centro"></i></div>
+          <div class="eixo" id="eixo" aria-hidden="true"></div>
         </div>
         <p class="faixa-txt" id="proj-aguarde" hidden></p>
-      </div>
-
-      <div class="blocos-sec">
-        <div class="bloco" id="bloco-contagem">
-          <h3 class="rotulo">Contagem até agora</h3>
-          <div class="placar">
-            <div class="lado lado-esq">
-              <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
-              <span class="pct" id="pct-esq"></span>
-            </div>
-            <div class="lado lado-dir">
-              <span class="nome"><span data-nome="dir"></span><i class="ponto ponto-dir" aria-hidden="true"></i></span>
-              <span class="pct" id="pct-dir"></span>
-            </div>
+        <div class="chance" id="chance" hidden>
+          <div class="chance-linha">
+            <p class="chance-rot">Chance de vitória</p>
+            <p class="chance-vals"><span data-nome="esq"></span> <b id="chance-esq"></b> · <span data-nome="dir"></span> <b id="chance-dir"></b></p>
           </div>
-        </div>
-
-        <div class="bloco" id="bloco-urnas">
-          <h3 class="rotulo">Urnas apuradas</h3>
-          <p class="pct" id="apuradas"></p>
-          <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
+          <div class="barra" aria-hidden="true"><span id="chance-barra"></span></div>
         </div>
       </div>
     </div>
 
-    <p id="frase" class="frase"></p>
-    <p class="dek">Linha contínua é a contagem até agora. Linha pontilhada leva à projeção do resultado final, com a faixa de incerteza em tom claro.</p>
-    <div id="grafico" class="grafico"></div>
-    <details class="tabela-gemea" id="serie-tabela">
-      <summary>Ver os pontos do gráfico em tabela</summary>
-      <div class="rolagem" id="serie-tabela-corpo"></div>
-    </details>
+    <section class="grafico-sec" aria-labelledby="t-grafico">
+      <h2 id="t-grafico">Evolução da contagem e projeção final</h2>
+      <ul class="legenda">
+        <li><i class="sw"></i>Contagem</li>
+        <li><i class="sw sw-proj"></i>Projeção</li>
+        <li><i class="sw sw-faixa"></i>Incerteza da projeção</li>
+      </ul>
+      <div id="grafico" class="grafico"></div>
+      <details class="tabela-gemea" id="serie-tabela">
+        <summary>Ver os pontos do gráfico em tabela</summary>
+        <div class="rolagem" id="serie-tabela-corpo"></div>
+      </details>
+    </section>
   </section>
 
   <section class="cartao" id="estados" role="tabpanel" aria-labelledby="aba-estados" hidden>
@@ -186,6 +190,6 @@
 </footer>
 
 <noscript><p class="miolo">Esta página precisa de JavaScript para mostrar a apuração.</p></noscript>
-<script src="app.js?v=9" defer></script>
+<script src="app.js?v=10" defer></script>
 </body>
 </html>
