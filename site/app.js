@@ -58,7 +58,7 @@ function sv(tag, attrs, ...filhos) {
 
 const params = new URLSearchParams(location.search);
 const ARQUIVO = params.has("exemplo")
-  ? params.get("exemplo") ? `dados/exemplo-${encodeURIComponent(params.get("exemplo"))}.json` : "dados/exemplo.json"
+  ? params.get("exemplo") ? `dados/exemplo-${encodeURIComponent(params.get("exemplo"))}.json` : "dados/exemplo-metade.json"
   : "dados/projecao.json";
 
 const estado = {

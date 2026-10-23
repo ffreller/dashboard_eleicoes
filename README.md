@@ -59,8 +59,9 @@ uv run eleicao ao-vivo --ano 2022 --url-base http://localhost:8765/oficial --int
 uv run eleicao servir
 ```
 
-Para ver a página com dados fictícios, abra `http://localhost:8000/?exemplo` ou
-`?exemplo=aguardando|inicio|vantagem|encerrada`.
+Para ver a página com dados fictícios, abra `http://localhost:8000/?exemplo` (a apuração de 2026 simulada
+até a metade, com o modelo de verdade) ou `?exemplo=aguardando|inicio|vantagem|encerrada`. Para refazer
+a simulação da metade: `uv run python scripts/gerar_exemplo_metade.py`.
 
 ## Fontes
 

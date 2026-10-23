@@ -44,6 +44,13 @@ def main() -> None:
         import http.server
 
         from eleicao.config import SITE
-        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(SITE))
+        class SemCache(http.server.SimpleHTTPRequestHandler):
+            """Sem isso o navegador guarda app.js e style.css antigos e não mostra mudanças na página."""
+
+            def end_headers(self) -> None:
+                self.send_header("Cache-Control", "no-cache")
+                super().end_headers()
+
+        handler = functools.partial(SemCache, directory=str(SITE))
         print(f"http://localhost:{args.porta}/")
         http.server.ThreadingHTTPServer(("", args.porta), handler).serve_forever()
