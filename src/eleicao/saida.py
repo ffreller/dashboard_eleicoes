@@ -105,7 +105,7 @@ class Saida:
             ultimo = self.serie[-1] if self.serie else None
             if ultimo is None or (ultimo["pct_secoes"], ultimo["apurado"]) != (ponto["pct_secoes"], ponto["apurado"]):
                 self.serie.append(ponto)
-            elif ultimo["projecao"] != ponto["projecao"]:
+            elif ultimo != ponto:
                 self.serie[-1] = ponto
             for uf, r in sorted(projecao.ufs.items()):
                 primeiro, anterior = self._refs[uf]
