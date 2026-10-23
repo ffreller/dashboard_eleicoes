@@ -49,7 +49,7 @@ for i, u in enumerate(inicio["ufs"]):
 gravar("inicio", inicio)
 
 vantagem = copy.deepcopy(base)
-vantagem["serie"] = [p for p in base["serie"] if p["pct_secoes"] <= 55]
+vantagem["serie"] = [p for p in vantagem["serie"] if p["pct_secoes"] <= 55]
 dp = 2.4
 for p in vantagem["serie"]:
     if p["apurado"] is not None:

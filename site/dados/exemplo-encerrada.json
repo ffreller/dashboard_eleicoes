@@ -35,168 +35,168 @@
    "hora": "2026-10-25T17:03:00-03:00",
    "pct_secoes": 5.4,
    "pct_aptos": 5.3,
-   "apurado": 47.18,
+   "apurado": 44.78,
    "votos_validos": 6376782,
    "projecao": {
-    "centro": 52.11,
-    "baixo": 50.67,
-    "alto": 53.54
+    "centro": 49.71,
+    "baixo": 48.27,
+    "alto": 51.14
    }
   },
   {
    "hora": "2026-10-25T17:06:00-03:00",
    "pct_secoes": 10.52,
    "pct_aptos": 10.31,
-   "apurado": 47.8,
+   "apurado": 45.4,
    "votos_validos": 12408960,
    "projecao": {
-    "centro": 52.02,
-    "baixo": 50.89,
-    "alto": 53.15
+    "centro": 49.62,
+    "baixo": 48.49,
+    "alto": 50.75
    }
   },
   {
    "hora": "2026-10-25T17:09:00-03:00",
    "pct_secoes": 15.35,
    "pct_aptos": 15.04,
-   "apurado": 48.41,
+   "apurado": 46.01,
    "votos_validos": 18115156,
    "projecao": {
-    "centro": 51.78,
-    "baixo": 50.79,
-    "alto": 52.77
+    "centro": 49.38,
+    "baixo": 48.39,
+    "alto": 50.37
    }
   },
   {
    "hora": "2026-10-25T17:12:00-03:00",
    "pct_secoes": 19.93,
    "pct_aptos": 19.53,
-   "apurado": 48.89,
+   "apurado": 46.49,
    "votos_validos": 23512986,
    "projecao": {
-    "centro": 51.79,
-    "baixo": 50.88,
-    "alto": 52.7
+    "centro": 49.39,
+    "baixo": 48.48,
+    "alto": 50.3
    }
   },
   {
    "hora": "2026-10-25T17:15:00-03:00",
    "pct_secoes": 24.25,
    "pct_aptos": 23.77,
-   "apurado": 49.23,
+   "apurado": 46.83,
    "votos_validos": 28619114,
    "projecao": {
-    "centro": 51.82,
-    "baixo": 50.97,
-    "alto": 52.66
+    "centro": 49.42,
+    "baixo": 48.57,
+    "alto": 50.26
    }
   },
   {
    "hora": "2026-10-25T17:18:00-03:00",
    "pct_secoes": 28.35,
    "pct_aptos": 27.78,
-   "apurado": 49.43,
+   "apurado": 47.03,
    "votos_validos": 33449305,
    "projecao": {
-    "centro": 51.97,
-    "baixo": 51.17,
-    "alto": 52.77
+    "centro": 49.57,
+    "baixo": 48.77,
+    "alto": 50.37
    }
   },
   {
    "hora": "2026-10-25T17:21:00-03:00",
    "pct_secoes": 32.22,
    "pct_aptos": 31.57,
-   "apurado": 49.91,
+   "apurado": 47.51,
    "votos_validos": 38018469,
    "projecao": {
-    "centro": 51.86,
-    "baixo": 51.08,
-    "alto": 52.63
+    "centro": 49.46,
+    "baixo": 48.68,
+    "alto": 50.23
    }
   },
   {
    "hora": "2026-10-25T17:24:00-03:00",
    "pct_secoes": 35.88,
    "pct_aptos": 35.16,
-   "apurado": 49.94,
+   "apurado": 47.54,
    "votos_validos": 42340714,
    "projecao": {
-    "centro": 52.05,
-    "baixo": 51.3,
-    "alto": 52.79
+    "centro": 49.65,
+    "baixo": 48.9,
+    "alto": 50.39
    }
   },
   {
    "hora": "2026-10-25T17:27:00-03:00",
    "pct_secoes": 39.35,
    "pct_aptos": 38.56,
-   "apurado": 50.35,
+   "apurado": 47.95,
    "votos_validos": 46429382,
    "projecao": {
-    "centro": 52.03,
-    "baixo": 51.31,
-    "alto": 52.75
+    "centro": 49.63,
+    "baixo": 48.91,
+    "alto": 50.35
    }
   },
   {
    "hora": "2026-10-25T17:30:00-03:00",
    "pct_secoes": 42.62,
    "pct_aptos": 41.77,
-   "apurado": 50.34,
+   "apurado": 47.94,
    "votos_validos": 50297096,
    "projecao": {
-    "centro": 52.17,
-    "baixo": 51.46,
-    "alto": 52.87
+    "centro": 49.77,
+    "baixo": 49.06,
+    "alto": 50.47
    }
   },
   {
    "hora": "2026-10-25T17:33:00-03:00",
    "pct_secoes": 45.73,
    "pct_aptos": 44.81,
-   "apurado": 50.37,
+   "apurado": 47.97,
    "votos_validos": 53955797,
    "projecao": {
-    "centro": 52.12,
-    "baixo": 51.43,
-    "alto": 52.81
+    "centro": 49.72,
+    "baixo": 49.03,
+    "alto": 50.41
    }
   },
   {
    "hora": "2026-10-25T17:36:00-03:00",
    "pct_secoes": 48.66,
    "pct_aptos": 47.69,
-   "apurado": 50.57,
+   "apurado": 48.17,
    "votos_validos": 57416779,
    "projecao": {
-    "centro": 51.88,
-    "baixo": 51.2,
-    "alto": 52.56
+    "centro": 49.48,
+    "baixo": 48.8,
+    "alto": 50.16
    }
   },
   {
    "hora": "2026-10-25T17:39:00-03:00",
    "pct_secoes": 51.43,
    "pct_aptos": 50.4,
-   "apurado": 50.62,
+   "apurado": 48.22,
    "votos_validos": 60690729,
    "projecao": {
-    "centro": 51.94,
-    "baixo": 51.27,
-    "alto": 52.6
+    "centro": 49.54,
+    "baixo": 48.87,
+    "alto": 50.2
    }
   },
   {
    "hora": "2026-10-25T17:42:00-03:00",
    "pct_secoes": 54.06,
    "pct_aptos": 52.98,
-   "apurado": 50.92,
+   "apurado": 48.52,
    "votos_validos": 63787752,
    "projecao": {
-    "centro": 51.9,
-    "baixo": 51.24,
-    "alto": 52.55
+    "centro": 49.5,
+    "baixo": 48.84,
+    "alto": 50.15
    }
   },
   {
