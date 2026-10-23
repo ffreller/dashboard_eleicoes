@@ -81,7 +81,6 @@ class Andamento:
     secoes_total: int
     secoes_totalizadas: int
     aptos_total: int
-    aptos_totalizados: int
     atualizado: datetime | None
 
     @property
@@ -98,7 +97,6 @@ def ler_andamento(dados: dict) -> dict[int, Andamento]:
                 secoes_total=int(item["s"]["ts"]),
                 secoes_totalizadas=int(item["s"]["st"]),
                 aptos_total=int(item["e"]["te"]),
-                aptos_totalizados=int(item["e"]["est"]),
                 atualizado=_datahora(item["dt"], item["ht"]),
             )
             for item in dados["abr"]

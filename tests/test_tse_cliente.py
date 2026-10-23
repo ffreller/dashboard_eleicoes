@@ -49,7 +49,7 @@ def test_esgotadas_as_tentativas_a_falha_e_contada():
 
 
 def andamento(st: int) -> Andamento:
-    return Andamento(mun=1, secoes_total=10, secoes_totalizadas=st, aptos_total=100, aptos_totalizados=10 * st, atualizado=None)
+    return Andamento(mun=1, secoes_total=10, secoes_totalizadas=st, aptos_total=100, atualizado=None)
 
 
 def resultado(st: int) -> Resultado:

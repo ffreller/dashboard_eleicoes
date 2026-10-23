@@ -56,11 +56,6 @@ class Parametros:
     nivel: float = 0.95
 
 
-NOMES_PERFIL = (
-    "outros", "dif_2t_anterior", "inclinacao", "outros_x_inclinacao", "capital", "porte", "abstencao", "brancos_nulos",
-)
-
-
 class Modelo:
     def __init__(self, base: Base, parametros: Parametros = Parametros()):
         self.base = base
@@ -121,7 +116,7 @@ class Modelo:
         estimativa = self._estimar(ap)
         if estimativa is None:
             return Projecao(momento=ap.momento, brasil=brasil, ufs=ufs)
-        centro, sorteios, _ = estimativa
+        centro, sorteios = estimativa
         nome_uf = self.ufs
 
         def com_faixa(r: Recorte, c: float, amostra: np.ndarray) -> Recorte:
@@ -179,9 +174,8 @@ class Modelo:
             swing[mun] -= f / np.maximum(df, 1e-9)
         return swing[mun]
 
-    def _estimar(self, ap: Apuracao) -> tuple[np.ndarray, np.ndarray, "Previsao"] | None:
-        """% da esquerda projetado [Brasil, UFs...], os sorteios (linhas) no mesmo formato e a previsão
-        central seção a seção."""
+    def _estimar(self, ap: Apuracao) -> tuple[np.ndarray, np.ndarray] | None:
+        """% da esquerda projetado [Brasil, UFs...] e os sorteios (linhas) no mesmo formato."""
         par, mi, nm = self.par, self.mi, self.base.n_municipios
         cont = ap.totalizada.astype(bool)
         est = ap.aptos.astype(float)
@@ -264,13 +258,5 @@ class Modelo:
             desvio_s = desvio + np.sqrt(var_desvio) * rng.standard_normal(nm) + choque[self.uf_idx]
             lk_s = k_mun + sd_lk * rng.standard_normal(nm) + (sd_lk_uf * rng.standard_normal(self.n_uf))[self.uf_idx]
             amostras[j] = total(theta_s, desvio_s, lk_s)
-        return centro, amostras, Previsao(falta, *secao(theta, desvio, k_mun))
+        return centro, amostras
 
-
-@dataclass(frozen=True)
-class Previsao:
-    """Previsão central para as seções que faltam (índices na Base), usada para diagnóstico."""
-
-    falta: np.ndarray
-    p: np.ndarray
-    validos: np.ndarray
