@@ -1,6 +1,7 @@
 "use strict";
 
 const ATUALIZAR_S = 30;
+const TSE_S = 20;
 const REPETIR_S = 15;
 const PARADO_MIN = 5;
 const FUSO = "America/Sao_Paulo";
@@ -66,6 +67,8 @@ const estado = {
   bruto: "",
   falha: null,
   proximo: 0,
+  tse: null,
+  tseFalha: null,
   sel: null,
   referencias: null,
   uf: null,
@@ -107,17 +110,67 @@ async function buscar() {
   estado.proximo = Date.now() + segundos * 1000;
   desenharStatus();
   temporizador = setTimeout(buscar, segundos * 1000);
+  if (estado.dados?.tse && !tseLigado) {
+    tseLigado = true;
+    buscarTse();
+  }
+}
+
+// Arquivo nacional do TSE no formato de um ponto da série. Antes da apuração não há votos, e então não há ponto.
+function pontoTse(j, numEsq, numDir) {
+  const vap = {};
+  for (const a of j.carg[0].agr) for (const p of a.par) for (const c of p.cand) vap[c.n] = Number(c.vap);
+  const esq = vap[numEsq], dir = vap[numDir], st = Number(j.s.st), ts = Number(j.s.ts);
+  if (!(esq >= 0 && dir >= 0 && ts > 0)) throw new Error("arquivo do TSE em formato inesperado");
+  if (esq + dir === 0) return null;
+  const [dia, mes, ano] = j.dt.split("/");
+  const hora = `${ano}-${mes}-${dia}T${j.ht}-03:00`;
+  if (Number.isNaN(Date.parse(hora))) throw new Error("arquivo do TSE sem hora de totalização");
+  return { hora, pct_secoes: (100 * st) / ts, apurado: (100 * esq) / (esq + dir), votos_validos: esq + dir };
+}
+
+let temporizadorTse = 0;
+let tseLigado = false;
+
+async function buscarTse() {
+  clearTimeout(temporizadorTse);
+  const d = estado.dados;
+  try {
+    // Sem `?t=`: o CDN do TSE responde 304 pelo ETag, e furar o cache dele multiplicaria a carga.
+    const r = await fetch(d.tse, { cache: "no-cache", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const ponto = pontoTse(await r.json(), d.candidatos.esq.numero, d.candidatos.dir.numero);
+    estado.tseFalha = null;
+    if (JSON.stringify(ponto) !== JSON.stringify(estado.tse)) {
+      estado.tse = ponto;
+      desenharResposta();
+    }
+  } catch (e) {
+    console.warn("Falha ao ler o TSE:", e);
+    estado.tseFalha ??= new Date();
+  }
+  desenharStatus();
+  temporizadorTse = setTimeout(buscarTse, TSE_S * 1000);
 }
 
 /* Situação */
 
+// A mais recente entre a contagem lida do TSE pelo navegador e o último ponto da projeção. A comparação pela hora
+// do TSE impede que uma cópia antiga do CDN faça a contagem recuar.
+function contagem(d) {
+  const u = d.fase === "aguardando" ? undefined : d.serie.at(-1);
+  const t = estado.tse;
+  return t && (!u || Date.parse(t.hora) >= Date.parse(u.hora)) ? t : u;
+}
+
 function situacao(d) {
   const u = d.serie.at(-1);
-  if (d.fase === "aguardando" || !u) return { tipo: "aguardando" };
-  if (d.fase === "encerrada") return { tipo: "encerrada", u };
-  if (!u.projecao) return { tipo: "sem-projecao", u };
+  const c = contagem(d);
+  if (!c) return { tipo: "aguardando" };
+  if (d.fase === "encerrada") return { tipo: "encerrada", u, c };
+  if (!u?.projecao) return { tipo: "sem-projecao", u, c };
   const { baixo, alto } = u.projecao;
-  return { tipo: baixo <= 50 && alto >= 50 ? "cruza" : "um-lado", u };
+  return { tipo: baixo <= 50 && alto >= 50 ? "cruza" : "um-lado", u, c };
 }
 
 const curto = (nome) => nome.split(" ")[0];
@@ -144,8 +197,10 @@ function desenharStatus() {
   let msg;
   if (estado.falha && !d) msg = `Não foi possível carregar os dados às ${hms(estado.falha)}. Nova tentativa às ${hms(estado.proximo)}.`;
   else if (estado.falha) msg = `Não foi possível atualizar às ${hms(estado.falha)}. Continuamos mostrando os dados de ${hms(d.atualizado)}. Nova tentativa às ${hms(estado.proximo)}.`;
+  else if (d && estado.tse) msg = `Contagem do TSE das ${hms(estado.tse.hora)}. Projeção atualizada às ${hms(d.atualizado)} (Brasília).`;
   else if (d) msg = `Dados atualizados às ${hms(d.atualizado)} (Brasília).`;
   else msg = "Carregando os dados…";
+  if (d && estado.tseFalha) msg += ` O TSE não responde desde ${hms(estado.tseFalha)}.`;
   if (txt.textContent !== msg) txt.textContent = msg;
   txt.classList.toggle("falha", !!estado.falha);
 
@@ -190,18 +245,19 @@ function pctHtml(alvo, txt) {
 }
 
 function frase(d, sit, nm) {
-  const { u } = sit;
+  const { u, c } = sit;
   switch (sit.tipo) {
     case "aguardando":
       return "A apuração ainda não começou. Esta página se atualiza sozinha quando o TSE divulgar os primeiros resultados.";
     case "sem-projecao":
-      return `Só ${pc(u.pct_secoes, 1)} das seções foram apuradas. A projeção aparece quando a contagem chegar a ${n(d.projecao_desde_pct, 0)}%. Até lá, o total parcial diz pouco sobre o resultado final.`;
+      if (c.pct_secoes >= d.projecao_desde_pct) return `${pc(c.pct_secoes, 1)} das seções foram apuradas. A projeção aparece em uma das próximas atualizações.`;
+      return `Só ${pc(c.pct_secoes, 1)} das seções foram apuradas. A projeção aparece quando a contagem chegar a ${n(d.projecao_desde_pct, 0)}%. Até lá, o total parcial diz pouco sobre o resultado final.`;
     case "cruza":
     case "um-lado":
       return "";
     case "encerrada": {
-      const e = u.apurado ?? u.projecao?.centro;
-      const restante = u.pct_secoes < 99.995 ? ` com ${pc(u.pct_secoes, 2)} das seções apuradas` : "";
+      const e = c.apurado ?? u?.projecao?.centro;
+      const restante = c.pct_secoes < 99.995 ? ` com ${pc(c.pct_secoes, 2)} das seções apuradas` : "";
       return `A apuração foi encerrada${restante}. Na contagem, ${nm.esq} tem ${pc(e)} dos votos válidos e ${nm.dir} tem ${pc(100 - e)}. A divulgação oficial do resultado é do TSE.`;
     }
   }
@@ -233,12 +289,14 @@ function desenharResposta() {
   const nm = nomes(d);
 
   for (const e of document.querySelectorAll("[data-nome]")) e.textContent = nm[e.dataset.nome];
-  $("fase").textContent = ROTULO_FASE[d.fase];
-  $("fase").dataset.fase = d.fase;
+  // O TSE pode mostrar votos antes de a projeção sair de "aguardando".
+  const fase = d.fase === "aguardando" && sit.tipo !== "aguardando" ? "apurando" : d.fase;
+  $("fase").textContent = ROTULO_FASE[fase];
+  $("fase").dataset.fase = fase;
   $("t-contagem").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem até agora";
 
-  const u = sit.u;
-  const apurado = sit.tipo === "encerrada" ? (u.apurado ?? u.projecao?.centro) : u?.apurado;
+  const { u, c } = sit;
+  const apurado = sit.tipo === "encerrada" ? (c.apurado ?? u?.projecao?.centro) : c?.apurado;
   const temNumeros = sit.tipo !== "aguardando" && apurado != null;
   $("cartoes").hidden = !temNumeros;
   if (temNumeros) {
@@ -247,8 +305,8 @@ function desenharResposta() {
     $("barra-contagem").style.setProperty("--p", `${apurado}%`);
     const margem = Math.abs(2 * apurado - 100);
     $("vantagem").textContent = margem < 0.005 ? "Empate" : `${apurado > 50 ? nm.esq : nm.dir} +${n(margem, 2)} p.p.`;
-    $("apuradas").textContent = pc(u.pct_secoes, u.pct_secoes % 1 ? 1 : 0);
-    $("progresso").style.setProperty("--p", `${u.pct_secoes}%`);
+    $("apuradas").textContent = pc(c.pct_secoes, c.pct_secoes % 1 ? 1 : 0);
+    $("progresso").style.setProperty("--p", `${c.pct_secoes}%`);
   }
 
   $("frase").textContent = frase(d, sit, nm);

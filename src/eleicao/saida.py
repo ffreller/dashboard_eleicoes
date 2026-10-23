@@ -90,6 +90,8 @@ class Saida:
     base: Base
     caminho: Path
     validacao: dict | None = None
+    tse_url: str | None = None
+    """Arquivo nacional do TSE que a página lê sozinha para mostrar a contagem sem esperar a projeção."""
     serie: list[dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -138,6 +140,7 @@ class Saida:
             "serie": self.serie,
             "ufs": ufs,
             "validacao": self.validacao,
+            "tse": self.tse_url,
         }
         self.caminho.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.caminho.with_suffix(".tmp")

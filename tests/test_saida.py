@@ -35,3 +35,10 @@ def test_uf_sem_um_por_cento_nao_mostra_projecao(base, tmp_path):
     doc = json.loads(arq.read_text())
     assert doc["serie"][-1]["projecao"] is not None
     assert all(u["projecao"] is None for u in doc["ufs"])
+
+
+def test_grava_o_arquivo_do_tse_que_a_pagina_le(base, tmp_path):
+    arq = tmp_path / "projecao.json"
+    url = ELEICOES[2026].divulgacao.resultado("br")
+    Saida(ELEICOES[2026], base, arq, tse_url=url).registrar(None, "aguardando", datetime(2026, 10, 25, 16))
+    assert json.loads(arq.read_text())["tse"] == url
