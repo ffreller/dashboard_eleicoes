@@ -281,6 +281,15 @@ function posicionarTrilha(trilha, baixo, alto, centro, pos) {
   trilha.style.setProperty("--a", `${a}%`);
   trilha.style.setProperty("--w", `${Math.max(0, b - a)}%`);
   trilha.style.setProperty("--c", `${pos(centro)}%`);
+  // Rótulos nas pontas da faixa (acima na trilha de cima, abaixo na de baixo), encostados na borda quando não cabem centralizados.
+  const [lo, hi] = trilha.querySelectorAll(".lim");
+  const rotular = (el, v, x) => {
+    el.textContent = pc(v, 2);
+    el.style.left = `${x}%`;
+    el.style.setProperty("--tx", x < 10 ? "0" : x > 90 ? "-100%" : "-50%");
+  };
+  rotular(lo, baixo, a);
+  rotular(hi, alto, b);
 }
 
 function desenharResposta() {
@@ -293,7 +302,7 @@ function desenharResposta() {
   const fase = d.fase === "aguardando" && sit.tipo !== "aguardando" ? "apurando" : d.fase;
   $("fase").textContent = ROTULO_FASE[fase];
   $("fase").dataset.fase = fase;
-  $("t-contagem").textContent = d.fase === "encerrada" ? "Contagem final" : "Contagem até agora";
+  $("t-contagem").textContent = d.fase === "encerrada" ? "Contagem final" : "Apuração";
 
   const { u, c } = sit;
   const apurado = sit.tipo === "encerrada" ? (c.apurado ?? u?.projecao?.centro) : c?.apurado;
@@ -306,7 +315,7 @@ function desenharResposta() {
     const margem = Math.abs(2 * apurado - 100);
     $("vantagem").textContent = margem < 0.005 ? "Empate" : `${apurado > 50 ? nm.esq : nm.dir} +${n(margem, 2)} p.p.`;
     $("apuradas").textContent = pc(c.pct_secoes, c.pct_secoes % 1 ? 1 : 0);
-    $("progresso").style.setProperty("--p", `${c.pct_secoes}%`);
+    document.querySelector(".apurado").hidden = d.fase === "encerrada";
   }
 
   $("frase").textContent = frase(d, sit, nm);
@@ -319,7 +328,8 @@ function desenharResposta() {
   aguarde.textContent = `Aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas.`;
   $("proj").hidden = !proj;
   const ch = proj && chanceDe(d, u);
-  $("chance").hidden = !ch;
+  for (const id of ["chance-esq", "chance-dir"]) $(id).hidden = !ch;
+  document.querySelector(".cht").hidden = !ch;
   if (proj) {
     pctHtml($("proj-pct-esq"), pc(proj.centro));
     pctHtml($("proj-pct-dir"), pc(100 - proj.centro));
@@ -331,7 +341,6 @@ function desenharResposta() {
   if (ch) {
     $("chance-esq").textContent = ch.esq;
     $("chance-dir").textContent = ch.dir;
-    $("chance-barra").style.setProperty("--p", `${u.projecao.chance}%`);
   }
 }
 
@@ -424,7 +433,7 @@ function desenharGrafico() {
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0", focusable: "true" });
   svg.setAttribute("aria-label", `Gráfico da evolução. Último ponto: ${pc(ultimo.pct_secoes, 1)} das seções apuradas`
-    + (ultimo.projecao ? `, projeção final de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
+    + (ultimo.projecao ? `, projeção de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
     + `. Use as setas do teclado para percorrer os pontos. Os mesmos dados estão na tabela abaixo.`);
 
   const recorte = sv("clipPath", { id: "recorte" }, sv("rect", { x: M.l, y: M.t, width: iw, height: ih }));
@@ -504,7 +513,7 @@ function desenharGrafico() {
   const dica = el("div", { class: "dica", hidden: true });
   host.append(svg, dica);
 
-  // Contagem até agora seguida do caminho projetado até 100%, ambos navegáveis pelo mouse e pelo teclado.
+  // Apuração seguida do caminho projetado até 100%, ambos navegáveis pelo mouse e pelo teclado.
   const pontos = [
     ...serie.map((q) => ({ x: q.pct_secoes, v: q.apurado, q })),
     ...caminho.slice(1).map((c) => ({ x: c.x, v: c.centro, c, final: ultimo.projecao })),
@@ -870,7 +879,7 @@ function detalheUf(u, nm) {
     p
       ? l(`Projeção: ${nm.esq} ${pc(p.centro, 1)} (faixa de ${n(p.baixo)} a ${n(p.alto)}), ${nm.dir} ${pc(100 - p.centro, 1)}.`)
       : l("Projeção: ainda não disponível."),
-    l(u.apurado != null ? `Contagem até agora: ${nm.esq} ${pc(u.apurado, 1)}, ${nm.dir} ${pc(100 - u.apurado, 1)}.` : "Contagem até agora: sem votos contados."),
+    l(u.apurado != null ? `Apuração: ${nm.esq} ${pc(u.apurado, 1)}, ${nm.dir} ${pc(100 - u.apurado, 1)}.` : "Apuração: sem votos contados."),
     l(`Para comparar, ${nm.esq} teve ${pc(u.primeiro_turno, 1)} no 1º turno de 2026 (só entre os dois) e ${pc(u.segundo_turno_anterior, 1)} no 2º turno de 2022.`),
   ];
   return [el("strong", { text: u.nome }), ...sub];

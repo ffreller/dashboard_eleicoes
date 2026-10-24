@@ -57,7 +57,10 @@
 
     <div class="cartoes" id="cartoes" hidden>
       <div class="cartao">
-        <h2 id="t-contagem">Contagem até agora</h2>
+        <div class="cartao-topo inicio">
+          <h2 id="t-contagem">Apuração</h2>
+          <span class="apurado">(<b id="apuradas"></b> das urnas apuradas)</span>
+        </div>
         <div class="placar">
           <div class="lado">
             <span class="nome"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
@@ -70,40 +73,32 @@
         </div>
         <div class="barra" aria-hidden="true"><span id="barra-contagem"></span></div>
         <p class="vantagem" id="vantagem"></p>
-        <div class="apurado">
-          <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
-          <p><b id="apuradas"></b> apurado</p>
-        </div>
       </div>
 
       <div class="cartao" id="cartao-projecao">
         <div class="cartao-topo">
-          <h2>Projeção final</h2>
+          <h2>Projeção</h2>
           <span class="chip">Estimativa</span>
         </div>
         <div class="proj" id="proj">
           <span class="nome ne"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
           <span class="pct pe" id="proj-pct-esq"></span>
+          <span class="chance-rot cht">Chance de vitória</span>
+          <span class="chance-n ce" id="chance-esq"></span>
           <span class="nome nd"><i class="ponto ponto-dir" aria-hidden="true"></i><span data-nome="dir"></span></span>
           <span class="pct pd" id="proj-pct-dir"></span>
+          <span class="chance-n cd" id="chance-dir"></span>
           <p class="tit">Incerteza · escala ampliada</p>
-          <div class="trilha te cor-esq" id="trilha-esq"><span class="faixa"></span><i class="centro"></i></div>
-          <div class="trilha td cor-dir" id="trilha-dir"><span class="faixa"></span><i class="centro"></i></div>
+          <div class="trilha te cor-esq" id="trilha-esq"><span class="faixa"></span><i class="centro"></i><span class="lim"></span><span class="lim"></span></div>
+          <div class="trilha td cor-dir" id="trilha-dir"><span class="faixa"></span><i class="centro"></i><span class="lim"></span><span class="lim"></span></div>
           <div class="eixo" id="eixo" aria-hidden="true"></div>
         </div>
         <p class="faixa-txt" id="proj-aguarde" hidden></p>
-        <div class="chance" id="chance" hidden>
-          <div class="chance-linha">
-            <p class="chance-rot">Chance de vitória</p>
-            <p class="chance-vals"><span data-nome="esq"></span> <b id="chance-esq"></b> · <span data-nome="dir"></span> <b id="chance-dir"></b></p>
-          </div>
-          <div class="barra" aria-hidden="true"><span id="chance-barra"></span></div>
-        </div>
       </div>
     </div>
 
     <section class="grafico-sec" aria-labelledby="t-grafico">
-      <h2 id="t-grafico">Evolução da contagem e projeção final</h2>
+      <h2 id="t-grafico">Evolução da contagem e projeção</h2>
       <ul class="legenda" id="legenda">
         <li><i class="sw"></i>Contagem</li>
         <li data-proj><i class="sw sw-proj"></i>Projeção</li>
