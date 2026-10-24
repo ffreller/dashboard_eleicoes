@@ -180,15 +180,6 @@ function nomes(d) {
   return { esq: curto(e.nome), dir: curto(r.nome), inicialEsq: curto(e.nome)[0], inicialDir: curto(r.nome)[0] };
 }
 
-// Nunca mostra 100% nem 0%: com 300 cenários, o extremo só diz que nenhum virou.
-function rotulosChance(chance) {
-  const e = Math.round(chance);
-  const lado = (v, arred) => (v > 99 ? "mais de 99%" : v < 1 ? "menos de 1%" : `${arred}%`);
-  return { esq: lado(chance, e), dir: lado(100 - chance, 100 - e) };
-}
-
-const chanceDe = (d, q) => (d.fase === "apurando" && q.projecao?.chance != null ? rotulosChance(q.projecao.chance) : null);
-
 /* Status e tema */
 
 function desenharStatus() {
@@ -327,9 +318,6 @@ function desenharResposta() {
   aguarde.hidden = !!proj;
   aguarde.textContent = `Aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas.`;
   $("proj").hidden = !proj;
-  const ch = proj && chanceDe(d, u);
-  for (const id of ["chance-esq", "chance-dir"]) $(id).hidden = !ch;
-  document.querySelector(".cht").hidden = !ch;
   if (proj) {
     pctHtml($("proj-pct-esq"), pc(proj.centro));
     pctHtml($("proj-pct-dir"), pc(100 - proj.centro));
@@ -337,10 +325,6 @@ function desenharResposta() {
     posicionarTrilha($("trilha-esq"), proj.baixo, proj.alto, proj.centro, pos);
     posicionarTrilha($("trilha-dir"), 100 - proj.alto, 100 - proj.baixo, 100 - proj.centro, pos);
     $("eixo").replaceChildren(...ticks.map((t) => el("span", { style: `--x:${pos(t.v)}%`, text: t.rot })));
-  }
-  if (ch) {
-    $("chance-esq").textContent = ch.esq;
-    $("chance-dir").textContent = ch.dir;
   }
 }
 
@@ -573,13 +557,11 @@ function conteudoDica(d, nm, p) {
     ...linha("dir", f(p.v == null ? null : 100 - p.v), ...(comFinal ? [f(100 - proj.centro)] : [])),
   );
   const faixa = p.final ? p.c : proj;
-  const chance = p.final ? null : chanceDe(d, p.q);
   return [
     el("strong", { text: `${pc(p.x, p.final ? 0 : 2)} das seções apuradas` }),
     el("span", { class: "dica-sub", text: p.final ? "Projeção, se o ritmo atual se mantiver" : hm(p.q.hora) }),
     tabela,
     faixa ? el("span", { class: "dica-sub", text: `${p.final ? "Faixa da contagem" : "Faixa da projeção"} (${nm.esq}): ${n(faixa.baixo)} a ${n(faixa.alto)}` }) : null,
-    chance ? el("span", { class: "dica-sub", text: `Chance de vencer: ${nm.esq} ${chance.esq} · ${nm.dir} ${chance.dir}` }) : null,
   ];
 }
 
@@ -614,20 +596,17 @@ function desenharTabelaSerie() {
   if (!$("serie-tabela").open) return;
   const nm = nomes(d);
   const f = (v) => (v == null ? "–" : n(v));
-  const comChance = d.fase === "apurando";
-  const chance = (q) => { const c = chanceDe(d, q); return c ? `${c.esq} / ${c.dir}` : "–"; };
   const linhas = [...d.serie].reverse().map((q) => el("tr", {},
     el("th", { scope: "row", text: hm(q.hora) }),
     el("td", { text: pc(q.pct_secoes, 2) }),
     el("td", { text: f(q.apurado) }),
     el("td", { text: f(q.projecao?.centro) }),
     el("td", { text: q.projecao ? `${n(q.projecao.baixo)} a ${n(q.projecao.alto)}` : "–" }),
-    comChance ? el("td", { text: chance(q) }) : null,
   ));
   corpo.replaceChildren(el("table", {},
     el("caption", { class: "vh", text: `Evolução da contagem e da projeção, em % de ${nm.esq} nos votos válidos` }),
     el("thead", {}, el("tr", {},
-      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção", ...(comChance ? [`Chance de vencer (${nm.esq} / ${nm.dir})`] : [])].map((t) => el("th", { scope: "col", text: t })))),
+      ...["Hora", "Seções apuradas", `Contagem (${nm.esq} %)`, `Projeção (${nm.esq} %)`, "Faixa da projeção"].map((t) => el("th", { scope: "col", text: t })))),
     el("tbody", {}, linhas)));
 }
 

@@ -79,14 +79,15 @@ def montar() -> tuple[Base, pl.DataFrame]:
     return base, cenario
 
 
-base, cenario = montar()
-final = 100 * cenario["esq"].sum() / (cenario["esq"].sum() + cenario["dir"].sum())
-for pct, momento, proj in gravar_exemplo(
-    base, cenario, SITE / "dados" / "exemplo-1t2026.json", lambda hora: datetime.fromisoformat(str(hora)[:19])
-):
-    f = proj.brasil.projecao
-    if f:
-        print(f"{pct:5.1f}% {momento:%H:%M} apurado {proj.brasil.apurado:.2f} projeção {f.centro:.2f} "
-              f"[{f.baixo:.2f}, {f.alto:.2f}] chance {f.chance:.1f}% erro {f.centro - final:+.2f}pp")
+if __name__ == "__main__":
+    base, cenario = montar()
+    final = 100 * cenario["esq"].sum() / (cenario["esq"].sum() + cenario["dir"].sum())
+    for pct, momento, proj in gravar_exemplo(
+        base, cenario, SITE / "dados" / "exemplo-1t2026.json", lambda hora: datetime.fromisoformat(str(hora)[:19])
+    ):
+        f = proj.brasil.projecao
+        if f:
+            print(f"{pct:5.1f}% {momento:%H:%M} apurado {proj.brasil.apurado:.2f} projeção {f.centro:.2f} "
+                  f"[{f.baixo:.2f}, {f.alto:.2f}] chance {f.chance:.1f}% erro {f.centro - final:+.2f}pp")
 
-print(f"final real do 1º turno de 2026, Lula entre os dois: {final:.2f}%")
+    print(f"final real do 1º turno de 2026, Lula entre os dois: {final:.2f}%")

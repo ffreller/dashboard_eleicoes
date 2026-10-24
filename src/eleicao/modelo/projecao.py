@@ -52,6 +52,10 @@ class Parametros:
     sd_ordem_uf: float = 0.02
     """Choques comuns no swing de tudo o que falta (no Brasil e em cada UF): o risco de as seções que
     chegam por último mudarem de voto de um jeito que as primeiras não mostram."""
+    c_ordem_nacional: float = 0.0
+    c_ordem_uf: float = 0.0
+    """Parte do choque de ordem que cai com o número efetivo de municípios já apurados (Kish, pelos votos):
+    o desvio vira sqrt(sd_ordem² + c² / n_eff). Poucos lugares vistos podem não representar os que faltam."""
     sorteios: int = 300
     nivel: float = 0.95
 
@@ -249,12 +253,17 @@ class Modelo:
             return 100 * np.concatenate([[e_uf.sum() / (e_uf.sum() + d_uf.sum())], e_uf / np.maximum(e_uf + d_uf, 1)])
 
         centro = total(theta, desvio, k_mun)
+        v2m, uf_m = v2[mun], self.uf_idx[mun]
+        n_eff = v2m.sum() ** 2 / (v2m**2).sum()
+        n_eff_uf = np.bincount(uf_m, v2m, self.n_uf) ** 2 / np.maximum(np.bincount(uf_m, v2m**2, self.n_uf), 1e-9)
+        sd_ordem_nac = np.sqrt(par.sd_ordem_nacional**2 + par.c_ordem_nacional**2 / n_eff)
+        sd_ordem_uf = np.sqrt(par.sd_ordem_uf**2 + par.c_ordem_uf**2 / np.maximum(n_eff_uf, 1))
         chol = np.linalg.cholesky(cov)
         rng = np.random.default_rng([int(ap.secoes.sum()), int(e_obs.sum()), int(d_obs.sum()), int(cont.sum())])
         amostras = np.empty((par.sorteios, 1 + self.n_uf))
         for j in range(par.sorteios):
             theta_s = theta + chol @ rng.standard_normal(len(theta))
-            choque = par.sd_ordem_nacional * rng.standard_normal() + par.sd_ordem_uf * rng.standard_normal(self.n_uf)
+            choque = sd_ordem_nac * rng.standard_normal() + sd_ordem_uf * rng.standard_normal(self.n_uf)
             desvio_s = desvio + np.sqrt(var_desvio) * rng.standard_normal(nm) + choque[self.uf_idx]
             lk_s = k_mun + sd_lk * rng.standard_normal(nm) + (sd_lk_uf * rng.standard_normal(self.n_uf))[self.uf_idx]
             amostras[j] = total(theta_s, desvio_s, lk_s)

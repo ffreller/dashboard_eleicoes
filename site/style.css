@@ -208,9 +208,8 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .apurado { font-size: 0.8125rem; color: var(--ink-3); }
 .apurado b { font-weight: 600; color: var(--ink-2); }
 
-.proj { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: ". . cht" "ne pe ce" "nd pd cd" "tit tit tit" "te te te" "td td td" "eixo eixo eixo"; align-items: center; column-gap: 16px; margin-top: 16px; }
+.proj { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ne pe" "nd pd" "tit tit" "te te" "td td" "eixo eixo"; align-items: center; column-gap: 16px; margin-top: 16px; }
 .proj .ne { grid-area: ne; } .proj .pe { grid-area: pe; }
-.proj .cht { grid-area: cht; justify-self: end; } .proj .ce { grid-area: ce; justify-self: end; } .proj .cd { grid-area: cd; justify-self: end; }
 .proj .nd { grid-area: nd; } .proj .pd { grid-area: pd; }
 .proj .tit { grid-area: tit; margin-top: 12px; padding-bottom: 6px; font-size: 0.75rem; color: var(--ink-3); }
 .proj .te { grid-area: te; } .proj .td { grid-area: td; }
@@ -224,10 +223,6 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .trilha .centro { position: absolute; top: 50%; left: var(--c); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--cor); }
 .eixo { position: relative; height: 1.25rem; margin-top: 4px; font-size: 0.75rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .eixo span { position: absolute; left: var(--x); transform: translateX(-50%); white-space: nowrap; }
-
-.chance-rot { font-size: 0.75rem; color: var(--ink-3); }
-.chance-n { font-size: 1.125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.chance-n[hidden], .cht[hidden] { display: none; }
 
 .grafico-sec h2 { font-size: 1.0625rem; line-height: 1.3; font-weight: 700; }
 .legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--ink-2); }
@@ -351,7 +346,7 @@ th[aria-sort="ascending"] .seta, th[aria-sort="descending"] .seta { opacity: 1; 
   #evolucao { gap: 28px; }
   .cartoes { grid-template-columns: 1fr 1.75fr; gap: 20px; }
   .cartoes.so-contagem { grid-template-columns: 1fr; }
-  .proj { grid-template-columns: auto auto auto 1fr; grid-template-areas: ". . cht tit" "ne pe ce te" "nd pd cd td" ". . . eixo"; column-gap: 24px; }
+  .proj { grid-template-columns: auto auto 1fr; grid-template-areas: ". . tit" "ne pe te" "nd pd td" ". . eixo"; column-gap: 24px; }
   .proj .tit { margin-top: 0; text-align: center; }
   .eixo { margin-top: 6px; }
 }

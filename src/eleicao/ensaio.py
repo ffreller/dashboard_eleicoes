@@ -61,9 +61,12 @@ def postos(cen: pl.DataFrame, ordem: str, semente: int = 1) -> np.ndarray:
     return posto
 
 
-def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Base | None = None) -> pl.DataFrame:
+def rodar(
+    ano: int, ordem: str, parametros: Parametros = Parametros(), base: Base | None = None, cen: pl.DataFrame | None = None,
+    pontos: tuple[float, ...] = PONTOS_PCT,
+) -> pl.DataFrame:
     base = base or Base.ler(BASES / str(ano))
-    cen = cenario_alinhado(base, ano)
+    cen = cenario_alinhado(base, ano) if cen is None else cen
     final = 100 * cen["esq"].sum() / (cen["esq"].sum() + cen["dir"].sum())
     final_uf = (
         cen.with_columns(pl.Series("uf", base.secoes["uf"])).group_by("uf")
@@ -74,7 +77,7 @@ def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Bas
     posto = postos(cen, ordem)
     inicio = datetime(ano, 10, 30, 17)
     linhas = []
-    for pct in PONTOS_PCT:
+    for pct in pontos:
         limite = int(np.ceil(cen.height * pct / 100))
         proj = modelo.projetar(apuracao_ate(base, cen, posto, limite, inicio + timedelta(minutes=pct)))
         b = proj.brasil
@@ -82,11 +85,16 @@ def rodar(ano: int, ordem: str, parametros: Parametros = Parametros(), base: Bas
         abertas = {u: r for u, r in proj.ufs.items() if r.projecao and r.pct_secoes < 100}
         erro_uf = [abs(r.projecao.centro - final_uf[u]) for u, r in abertas.items()]
         cobre_uf = [r.projecao.baixo - 0.005 <= final_uf[u] <= r.projecao.alto + 0.005 for u, r in abertas.items()]
+        z_uf = [
+            (final_uf[u] - r.projecao.centro) / max((r.projecao.alto - r.projecao.baixo) / 3.92, 1e-6)
+            for u, r in abertas.items()
+        ]
         linhas.append({
             "ordem": ordem, "pct_secoes": b.pct_secoes, "apurado": b.apurado, "final": final,
             "centro": f and f.centro, "baixo": f and f.baixo, "alto": f and f.alto, "chance": f and f.chance,
             "erro_uf_medio": float(np.mean(erro_uf)) if erro_uf else None,
             "cobertura_uf": float(np.mean(cobre_uf)) if cobre_uf else None,
+            "z_uf": z_uf,
         })
     return pl.DataFrame(linhas).with_columns(
         (pl.col("centro") - pl.col("final")).alias("erro"),

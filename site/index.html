@@ -83,11 +83,8 @@
         <div class="proj" id="proj">
           <span class="nome ne"><i class="ponto ponto-esq" aria-hidden="true"></i><span data-nome="esq"></span></span>
           <span class="pct pe" id="proj-pct-esq"></span>
-          <span class="chance-rot cht">Chance de vitória</span>
-          <span class="chance-n ce" id="chance-esq"></span>
           <span class="nome nd"><i class="ponto ponto-dir" aria-hidden="true"></i><span data-nome="dir"></span></span>
           <span class="pct pd" id="proj-pct-dir"></span>
-          <span class="chance-n cd" id="chance-dir"></span>
           <p class="tit">Incerteza · escala ampliada</p>
           <div class="trilha te cor-esq" id="trilha-esq"><span class="faixa"></span><i class="centro"></i><span class="lim"></span><span class="lim"></span></div>
           <div class="trilha td cor-dir" id="trilha-dir"><span class="faixa"></span><i class="centro"></i><span class="lim"></span><span class="lim"></span></div>
@@ -141,7 +138,6 @@
       <li><strong>Somar.</strong> A projeção é o que já foi contado mais a estimativa do que falta contar.</li>
     </ol>
     <p>A <strong>faixa</strong> mostra a incerteza: quanto a estimativa ainda pode errar. Ela começa larga, quando pouco foi apurado, e vai estreitando conforme a contagem avança. Enquanto a faixa ainda cruza os 50%, o resultado está em aberto.</p>
-    <p>A <strong>chance de vencer</strong> sai das mesmas simulações: é a parcela dos cenários simulados em que cada candidato termina com mais da metade dos votos válidos. Se um candidato aparece com 30%, ele terminou na frente em cerca de 30 de cada 100 cenários. Não é uma pesquisa de opinião nem uma garantia, e o número muda conforme a contagem avança.</p>
 
     <details class="detalhes">
       <summary>Detalhes técnicos</summary>
@@ -179,8 +175,7 @@
           seu erro, os desvios de cada município, a razão de votos válidos (por município e por estado) e um choque comum
           para tudo o que falta, no país (1,5 ponto em logit) e em cada estado (2 pontos). Esse choque representa o risco de
           as seções que chegam por último terem mudado de voto de um jeito que as primeiras não mostram, que é a principal
-          fonte de erro nos testes. A faixa vai do 2,5º ao 97,5º percentil dos cenários, e a chance de vencer é a parcela dos
-          cenários acima de 50%. O sorteio usa uma semente calculada a partir da própria apuração: os mesmos dados sempre
+          fonte de erro nos testes. A faixa vai do 2,5º ao 97,5º percentil dos cenários. O sorteio usa uma semente calculada a partir da própria apuração: os mesmos dados sempre
           dão a mesma faixa, e ela só muda quando chegam votos novos.</p>
         <p><strong>Teste.</strong> O método foi ensaiado nos 2º turnos de 2022 e de 2018, reproduzindo a ordem real em que as
           seções foram chegando e lendo os mesmos arquivos que o TSE publica. Os resultados estão em “Teste com 2022”,
