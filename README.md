@@ -11,7 +11,7 @@ O pipeline em Python lê a divulgação do TSE a cada ciclo e grava `site/dados/
 Cada seção tem duas referências: o voto dela no 1º turno de 2026 e o voto do mesmo local no 2º turno de
 2022. Em cada município que já começou a apurar, o modelo mede a mudança de voto entre o apurado e o 1º
 turno das mesmas seções. Uma regressão explica essa mudança pelo perfil do lugar e a aplica às seções que
-faltam. A faixa vem de 200 sorteios e inclui um choque comum para tudo o que falta.
+faltam. A faixa vem de 300 sorteios e inclui um choque comum para tudo o que falta.
 
 O detalhe está em `src/eleicao/modelo/projecao.py` e na seção "Detalhes técnicos" da página.
 
@@ -91,3 +91,11 @@ a simulação da metade: `uv run python scripts/gerar_exemplo_metade.py`.
 
 - Divulgação de resultados do TSE: `resultados.tse.jus.br` (eleição 6258, pleito 3221).
 - Dados abertos do TSE: votação e detalhe da apuração por seção eleitoral (2014, 2018, 2022 e 2026).
+
+## Inspiração
+
+Este projeto foi inspirado pela [página de projeção](https://projecao.2026elections.workers.dev/) criada por Rodrigo Mahlmeister ([@ro_mahl](https://x.com/ro_mahl)) para as previsões do 1º turno de 2026. A estrutura geral do método (medir a mudança de voto nos municípios já apurados, explicá-la por uma regressão hierárquica do perfil do lugar e aplicá-la às seções que faltam) segue a ideia descrita na página dele, que foi lida antes de desenharmos o modelo. O código, a base de dados e a implementação são próprios.
+
+## Desenvolvimento
+
+Projeto desenvolvido com o auxílio do [Claude Code](https://claude.com/claude-code).

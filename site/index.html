@@ -154,25 +154,48 @@
         <p><strong>Referências de cada seção.</strong> Para cada uma das cerca de 499 mil seções (urnas), a página guarda o
           voto de Lula, de Flávio e dos demais candidatos no 1º turno de 2026, na própria seção, e a fração de Lula no 2º turno
           de 2022. Como seções mudam de número e de local entre eleições, a de 2022 é achada por etapas: a mesma seção no
-          mesmo local (89% do eleitorado), o mesmo local pelo nome dentro do município (6%), e então a zona ou o município.</p>
+          mesmo local (89% do eleitorado), o mesmo local pelo nome dentro do município (6%), e então a zona ou o município.
+          Toda a estimativa trabalha em logit (log da razão entre os dois candidatos), escala em que uma mudança de voto
+          tem o mesmo tamanho em lugares onde um candidato tem 20% ou 80%.</p>
         <p><strong>O que é medido.</strong> A cada ciclo, a página lê os arquivos públicos da divulgação do TSE: quais seções
-          já foram totalizadas e o resultado de cada município. Em cada município que já começou, ela compara a fração de
-          Lula entre os dois candidatos no que foi apurado com a fração das mesmas seções no 1º turno (em escala logística).
-          Essa diferença é a mudança de voto do município.</p>
+          já foram totalizadas e o resultado de cada município. Em cada município que já começou, ela procura o deslocamento
+          único, em logit, que somado ao voto do 1º turno de cada seção apurada reproduz a fração de Lula observada. Essa
+          é a mudança de voto do município. Ela é resolvida seção a seção (método de Newton) e não pela diferença entre dois
+          totais, porque nessa subtração seções muito diferentes entre si produzem um erro que passaria para as seções que
+          faltam. Quando poucos votos foram contados, a mudança medida é pouco confiável: sua variância é a binomial
+          multiplicada por 3 e o município pesa menos na regressão.</p>
         <p><strong>Como a mudança é estendida.</strong> Uma regressão ponderada explica a mudança dos municípios pelo perfil
           das seções: voto nos demais candidatos no 1º turno, diferença entre 2022 e o 1º turno de 2026, inclinação política,
-          abstenção, brancos e nulos, capital e porte do município, com ajustes por região e por estado puxados para a média
-          nacional quando há poucos dados. Cada seção que falta recebe o seu voto do 1º turno mais a mudança prevista para o
-          seu perfil, mais o desvio próprio do seu município, proporcional ao quanto dele já foi apurado. O número de votos
-          válidos que falta vem do 1º turno, corrigido pela variação de comparecimento medida no município e no estado.</p>
-        <p><strong>A faixa.</strong> A página sorteia 200 cenários: coeficientes da regressão dentro do seu erro, desvios de
-          cada município e um choque comum para tudo o que falta, no país e em cada estado. Esse choque representa o risco de
+          a interação entre os dois últimos, abstenção, brancos e nulos, capital e porte do município. Há interceptos
+          nacional, por região e por estado, puxados para o nacional quando há poucos dados. A regressão usa uma
+          distribuição a priori para cada coeficiente; sem dados suficientes, o coeficiente fica perto de zero em vez de
+          seguir o ruído.</p>
+        <p><strong>Quanto cada município varia.</strong> Além do perfil, cada município tem um desvio próprio. A variação
+          esperada entre municípios, estados e regiões tem um piso, calibrado nos 2º turnos de 2022 e de 2018, e é
+          reestimada em 3 passadas com a dispersão que a própria apuração mostra. Uma eleição em que os estados divergem
+          muito gera faixas mais largas, sem ajuste manual.</p>
+        <p><strong>As seções que faltam.</strong> Cada seção recebe o seu voto do 1º turno mais a mudança prevista para o
+          seu perfil, mais o desvio do seu município, que é encolhido: quanto menos do município foi apurado, menos esse
+          desvio é levado a sério. O número de votos válidos que falta vem do 1º turno multiplicado pela razão entre os
+          votos do 2º e do 1º turno medida no município. Essa razão é puxada para a do estado (equivalente a 5 mil votos
+          de peso) e depois para a nacional, para que um município com poucos votos contados não decida sozinho o
+          comparecimento do que falta. Em municípios já completos no resultado do TSE, não sobra nada a estimar.</p>
+        <p><strong>A faixa.</strong> A página sorteia 300 cenários. Em cada um variam os coeficientes da regressão dentro do
+          seu erro, os desvios de cada município, a razão de votos válidos (por município e por estado) e um choque comum
+          para tudo o que falta, no país (1,5 ponto em logit) e em cada estado (2 pontos). Esse choque representa o risco de
           as seções que chegam por último terem mudado de voto de um jeito que as primeiras não mostram, que é a principal
-          fonte de erro nos testes. A faixa vai do 2,5º ao 97,5º percentil dos cenários.</p>
+          fonte de erro nos testes. A faixa vai do 2,5º ao 97,5º percentil dos cenários, e a chance de vencer é a parcela dos
+          cenários acima de 50%. O sorteio usa uma semente calculada a partir da própria apuração: os mesmos dados sempre
+          dão a mesma faixa, e ela só muda quando chegam votos novos.</p>
+        <p><strong>Teste.</strong> O método foi ensaiado nos 2º turnos de 2022 e de 2018, reproduzindo a ordem real em que as
+          seções foram chegando e lendo os mesmos arquivos que o TSE publica. Os resultados estão em “Teste com 2022”,
+          abaixo.</p>
         <p><strong>Limitações.</strong> O modelo supõe que lugares parecidos mudam de voto de modo parecido. Uma virada
           concentrada em um tipo de lugar que ainda não começou a apurar só aparece quando ele chega. O voto no exterior chega
           tarde e tem referências mais fracas. Os arquivos de seções e de resultados do TSE são gerados em momentos
-          diferentes; quando divergem, a página usa o resultado e ajusta a referência na mesma proporção.</p>
+          diferentes; quando divergem, a página usa o resultado e ajusta a referência na mesma proporção. A faixa
+          cobre a incerteza que o modelo conhece; um erro de dados do TSE ou um comportamento nunca visto em 2018 e 2022
+          não está nela.</p>
       </div>
     </details>
 
@@ -180,6 +203,13 @@
       <h3 class="subtitulo">Teste com 2022</h3>
       <p id="validacao-texto"></p>
     </div>
+
+    <h3 class="subtitulo">Inspiração</h3>
+    <p>Este projeto foi inspirado pela <a href="https://projecao.2026elections.workers.dev/" rel="noopener">página de projeção</a>
+      criada por Rodrigo Mahlmeister (<a href="https://x.com/ro_mahl" rel="noopener">@ro_mahl</a>) para as previsões do 1º turno de 2026.
+      A estrutura geral do método (medir a mudança de voto nos municípios já apurados, explicá-la por uma regressão
+      hierárquica do perfil do lugar e aplicá-la às seções que faltam) segue a ideia descrita na página dele, lida
+      antes de desenhar o nosso modelo. O código, a base de dados e a implementação são próprios.</p>
   </section>
 
   <div class="abas" role="tablist" aria-label="Seções da página">
@@ -192,7 +222,8 @@
 <footer class="rodape">
   <div class="miolo">
     <p>Fonte dos dados: Tribunal Superior Eleitoral (TSE), <a href="https://resultados.tse.jus.br/" rel="noopener">divulgação de resultados</a> e <a href="https://dadosabertos.tse.jus.br/" rel="noopener">dados abertos</a>.</p>
-    <p>Este é um projeto independente, sem vínculo com o TSE. A projeção é uma estimativa e pode errar.</p>
+    <p>Inspirado na <a href="https://projecao.2026elections.workers.dev/" rel="noopener">projeção</a> de Rodrigo Mahlmeister (<a href="https://x.com/ro_mahl" rel="noopener">@ro_mahl</a>).</p>
+    <p>Desenvolvido com o auxílio do <a href="https://claude.com/claude-code" rel="noopener">Claude Code</a>.</p>
   </div>
 </footer>
 

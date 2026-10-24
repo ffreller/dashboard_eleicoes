@@ -9,7 +9,7 @@ A base é a fração da esquerda entre os dois candidatos no 1º turno de 2026, 
 Em cada município que já começou a apurar, o swing é a mudança de voto entre o apurado e o 1º turno das mesmas seções totalizadas. `_swing_uniforme` resolve por Newton o deslocamento uniforme em logit que, somado a cada seção apurada, reproduz a fração observada. Subtrair logits agregados erra quando as seções são heterogêneas, e o erro passaria para as seções que faltam.
 
 ## 3. Regressão do swing
-Uma regressão ponderada com priori normal explica o swing pelo perfil do lugar (`NOMES_PERFIL`):
+Uma regressão ponderada com priori normal explica o swing pelo perfil do lugar:
 - outros (voto nos demais candidatos)
 - dif_2t_anterior
 - inclinacao
@@ -40,6 +40,3 @@ O choque cobre o risco de as seções que chegam por último mudarem de voto de 
 
 ## 6. Validação
 Os ensaios (`eleicao ensaio`) replayam os 2º turnos de 2022 e 2018 na ordem real de chegada das seções. `eleicao tse-falso` serve esse replay nos mesmos arquivos do TSE. Os pisos de região e UF foram calibrados entre a dispersão medida em 2022 (0,016 e 0,019) e em 2018 (0,076 e 0,099).
-
-## Nota
-O README diz "200 sorteios", mas o código usa 300.

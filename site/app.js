@@ -180,7 +180,7 @@ function nomes(d) {
   return { esq: curto(e.nome), dir: curto(r.nome), inicialEsq: curto(e.nome)[0], inicialDir: curto(r.nome)[0] };
 }
 
-// Nunca mostra 100% nem 0%: com 200 cenários, o extremo só diz que nenhum virou.
+// Nunca mostra 100% nem 0%: com 300 cenários, o extremo só diz que nenhum virou.
 function rotulosChance(chance) {
   const e = Math.round(chance);
   const lado = (v, arred) => (v > 99 ? "mais de 99%" : v < 1 ? "menos de 1%" : `${arred}%`);
