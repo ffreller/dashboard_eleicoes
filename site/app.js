@@ -98,8 +98,11 @@ async function buscar() {
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const texto = await r.text();
-    if (texto !== estado.bruto) {
-      estado.dados = validar(JSON.parse(texto));
+    // Cada nó do CDN do Pages troca de versão numa hora diferente, então uma resposta pode ser mais antiga que a
+    // anterior. Aceitá-la faria a página recuar.
+    const novo = texto !== estado.bruto && validar(JSON.parse(texto));
+    if (novo && !(Date.parse(novo.atualizado) < Date.parse(estado.dados?.atualizado))) {
+      estado.dados = novo;
       estado.bruto = texto;
       desenhar();
     }
