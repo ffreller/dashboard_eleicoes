@@ -157,12 +157,16 @@ async function buscarTse() {
 
 /* Situação */
 
-// A mais recente entre a contagem lida do TSE pelo navegador e o último ponto da projeção. A comparação pela hora
-// do TSE impede que uma cópia antiga do CDN faça a contagem recuar.
+// A mais adiantada entre a contagem lida do TSE pelo navegador e o último ponto da projeção: mais seções vence,
+// e a hora só desempata. A hora sozinha não serve: o ponto da projeção leva a hora da última seção dos arquivos
+// por UF, que pode ser posterior à do arquivo nacional mesmo vendo bem menos seções. Comparar seções também
+// impede que uma cópia antiga do CDN faça a contagem recuar.
 function contagem(d) {
   const u = d.fase === "aguardando" ? undefined : d.serie.at(-1);
   const t = estado.tse;
-  return t && (!u || Date.parse(t.hora) >= Date.parse(u.hora)) ? t : u;
+  if (!t || !u) return t ?? u;
+  if (t.pct_secoes !== u.pct_secoes) return t.pct_secoes > u.pct_secoes ? t : u;
+  return Date.parse(t.hora) >= Date.parse(u.hora) ? t : u;
 }
 
 function situacao(d) {
