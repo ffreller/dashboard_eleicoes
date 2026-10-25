@@ -479,16 +479,7 @@ function desenharGrafico() {
   const igual = (v) => v;
   const contagem = (f) => segmentos(serie, (q) => (q.pct_secoes >= d.projecao_desde_pct ? q.apurado : null)).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
   const caminho = caminhoAteFim(ultimo);
-  for (const li of $("legenda").querySelectorAll("[data-proj]")) li.hidden = !caminho.length;
-  const fimLinha = (f) => caminho.length ? "M" + caminho.map((c) => pto(c.x, f(c.centro))).join("L") : "";
-  const fimFaixa = (f) => caminho.length
-    ? `M${caminho.map((c) => pto(c.x, f(c.alto))).join("L")}L${caminho.map((c) => pto(c.x, f(c.baixo))).reverse().join("L")}Z`
-    : "";
   const grupo = sv("g", { "clip-path": "url(#recorte)" },
-    sv("path", { class: "faixa-area cor-esq", d: fimFaixa(igual) }),
-    sv("path", { class: "faixa-area cor-dir", d: fimFaixa(espelhar) }),
-    sv("path", { class: "linha-proj cor-esq", d: fimLinha(igual) }),
-    sv("path", { class: "linha-proj cor-dir", d: fimLinha(espelhar) }),
     sv("path", { class: "linha-bruta cor-esq", d: contagem(igual) }),
     sv("path", { class: "linha-bruta cor-dir", d: contagem(espelhar) }),
   );

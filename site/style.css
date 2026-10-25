@@ -234,12 +234,10 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--ink-2); }
 .legenda li { display: inline-flex; align-items: center; gap: 8px; }
 .sw { display: block; width: 18px; height: 0; border-top: 2px solid var(--ink-3); }
-.sw-proj { border-top-style: dashed; }
 .cmp-atual { --c: var(--ink); --w: 2.5px; }
 .cmp-1t2026 { --c: var(--cmp-ambar); --w: 2px; }
 .cmp-2t2022 { --c: var(--cmp-verde); --w: 2px; }
 .sw-cmp { display: block; width: 22px; height: 0; border-top: var(--w) solid var(--c); }
-.sw-faixa { width: 22px; height: 10px; border: 0; background: color-mix(in srgb, var(--ink-3) 35%, transparent); }
 
 /* Gráfico */
 
@@ -254,9 +252,7 @@ main { padding-block: 14px 40px; display: flex; flex-direction: column; gap: 16p
 .grafico .agora { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
 .cor-esq { --cor: var(--esq); }
 .cor-dir { --cor: var(--dir); }
-.grafico .faixa-area { fill: var(--cor); fill-opacity: 0.16; }
 .grafico .linha-bruta { fill: none; stroke: var(--cor); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
-.grafico .linha-proj { fill: none; stroke: var(--cor); stroke-width: 2; stroke-dasharray: 5 4; stroke-linecap: butt; }
 .grafico .ponto-proj { fill: var(--cor); stroke: var(--surf); stroke-width: 2; }
 .grafico .ponto-bruto { fill: var(--surf); stroke: var(--cor); stroke-width: 2.5; }
 .grafico .linha-cmp { fill: none; stroke: var(--c); stroke-width: var(--w); stroke-linejoin: round; stroke-linecap: round; }
