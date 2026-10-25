@@ -381,29 +381,6 @@ function pontosDe(v) {
   ];
 }
 
-// Caminho da contagem do ponto atual até 100% se ela terminar na projeção (ou numa ponta da faixa).
-// O voto restante entra a uma taxa constante, então a parcial acumulada é a média ponderada
-// do que já foi contado com essa taxa: anda rápido logo depois do ponto atual e depois se acomoda.
-function caminhoAteFim(q, passos = 32) {
-  const pr = q.projecao;
-  if (!pr || q.apurado == null || q.pct_secoes >= 100) return [];
-  const f0 = (q.pct_aptos ?? q.pct_secoes) / 100;
-  const acumulado = (fim, f) => {
-    const taxa = (fim - f0 * q.apurado) / (1 - f0);
-    return (f0 * q.apurado + (f - f0) * taxa) / f;
-  };
-  return Array.from({ length: passos + 1 }, (_, k) => {
-    const t = k / passos;
-    const f = f0 + t * (1 - f0);
-    return {
-      x: q.pct_secoes + t * (100 - q.pct_secoes),
-      centro: acumulado(pr.centro, f),
-      baixo: acumulado(pr.baixo, f),
-      alto: acumulado(pr.alto, f),
-    };
-  });
-}
-
 function desenharGrafico() {
   const d = estado.dados;
   const host = $("grafico");
@@ -489,7 +466,6 @@ function desenharGrafico() {
   const espelhar = (v) => 100 - v;
   const igual = (v) => v;
   const contagem = (f) => segmentos(serie, (q) => (q.pct_secoes >= d.projecao_desde_pct ? q.apurado : null)).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
-  const caminho = caminhoAteFim(ultimo);
   const grupo = sv("g", { "clip-path": "url(#recorte)" },
     sv("path", { class: "linha-bruta cor-esq", d: contagem(igual) }),
     sv("path", { class: "linha-bruta cor-dir", d: contagem(espelhar) }),
@@ -497,7 +473,7 @@ function desenharGrafico() {
   svg.append(grupo);
 
   const dentro = (v) => v != null && v >= lo && v <= hi;
-  if (caminho.length) {
+  if (ultimo.projecao && ultimo.apurado != null && ultimo.pct_secoes < 100) {
     for (const [cls, v] of [["ponto-proj cor-esq", ultimo.projecao.centro], ["ponto-proj cor-dir", 100 - ultimo.projecao.centro]]) {
       if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(100), cy: Y(v), r: 5 }));
     }
@@ -517,11 +493,8 @@ function desenharGrafico() {
   const dica = el("div", { class: "dica", hidden: true });
   host.append(svg, dica);
 
-  // Apuração seguida do caminho projetado até 100%, ambos navegáveis pelo mouse e pelo teclado.
-  const pontos = [
-    ...serie.map((q) => ({ x: q.pct_secoes, v: q.apurado, q })),
-    ...caminho.slice(1).map((c) => ({ x: c.x, v: c.centro, c, final: ultimo.projecao })),
-  ];
+  // Pontos da apuração, navegáveis pelo mouse e pelo teclado.
+  const pontos = serie.map((q) => ({ x: q.pct_secoes, v: q.apurado, q }));
   desenhoGrafico = { X, Y, M, W, mira, dica, svg, pontos, lo, hi, nm, d };
   const pctDe = (clientX) => {
     const r = svg.getBoundingClientRect();
@@ -567,21 +540,20 @@ function conteudoDica(d, nm, p) {
     ...vals.map((v) => el("span", { text: v })),
   ];
   const f = (v) => (v == null ? "–" : pc(v));
-  const proj = p.final ?? p.q.projecao;
+  const proj = p.q.projecao;
   const comFinal = proj != null;
   const tabela = el("div", { class: `dica-tab${comFinal ? " com-final" : ""}` },
     el("span"),
-    el("span", { class: "dica-cab", text: p.final ? "Contagem estimada" : "Contagem" }),
+    el("span", { class: "dica-cab", text: "Contagem" }),
     comFinal ? el("span", { class: "dica-cab", text: "Final projetado" }) : null,
     ...linha("esq", f(p.v), ...(comFinal ? [f(proj.centro)] : [])),
     ...linha("dir", f(p.v == null ? null : 100 - p.v), ...(comFinal ? [f(100 - proj.centro)] : [])),
   );
-  const faixa = p.final ? p.c : proj;
   return [
-    el("strong", { text: `${pc(p.x, p.final ? 0 : 2)} das seções apuradas` }),
-    el("span", { class: "dica-sub", text: p.final ? "Projeção, se o ritmo atual se mantiver" : hm(p.q.hora) }),
+    el("strong", { text: `${pc(p.x, 2)} das seções apuradas` }),
+    el("span", { class: "dica-sub", text: hm(p.q.hora) }),
     tabela,
-    faixa ? el("span", { class: "dica-sub", text: `${p.final ? "Faixa da contagem" : "Faixa da projeção"} (${nm.esq}): ${n(faixa.baixo)} a ${n(faixa.alto)}` }) : null,
+    proj ? el("span", { class: "dica-sub", text: `Faixa da projeção (${nm.esq}): ${n(proj.baixo)} a ${n(proj.alto)}` }) : null,
   ];
 }
 
@@ -595,7 +567,7 @@ function desenharMira() {
   pontosDe(p.v).forEach(([cls, v], k) => {
     const ok = v != null && v >= g.lo && v <= g.hi;
     circulos[k].setAttribute("visibility", ok ? "visible" : "hidden");
-    circulos[k].setAttribute("class", p.final ? cls.replace("ponto-bruto", "ponto-proj") : cls);
+    circulos[k].setAttribute("class", cls);
     if (ok) { circulos[k].setAttribute("cx", g.X(p.x)); circulos[k].setAttribute("cy", g.Y(v)); }
   });
   g.mira.setAttribute("visibility", "visible");
