@@ -331,7 +331,11 @@ function desenharResposta() {
     posicionarTrilha($("trilha-esq"), proj.baixo, proj.alto, proj.centro, pos);
     posicionarTrilha($("trilha-dir"), 100 - proj.alto, 100 - proj.baixo, 100 - proj.centro, pos);
     $("eixo").replaceChildren(...ticks.map((t) => el("span", { style: `--x:${pos(t.v)}%`, text: t.rot })));
+    // Fração do eleitorado nas seções apuradas: aproxima a fração dos votos que entrou na projeção.
+    const base = u.pct_aptos ?? u.pct_secoes;
+    $("proj-base").textContent = `Baseada em ${pc(base, 1)} dos votos (apurados até ${FMT_HM.format(new Date(u.hora))}).`;
   }
+  $("proj-base").hidden = !proj;
 }
 
 /* Gráfico de evolução */
