@@ -28,6 +28,8 @@ const ESCALA = [
 const FMT = [0, 1, 2].map((d) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }));
 const n = (x, d = 1) => FMT[d].format(x);
 const pc = (x, d = 2) => n(x, d) + "%";
+// Fração de seções com uma casa, sem mostrar "0,0%" quando já há votos contados.
+const pcSecoes = (x) => (x > 0 && x < 0.05 ? "menos de 0,1%" : pc(x, 1));
 const dataHora = (opts) => new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, ...opts });
 const FMT_HM = dataHora({ hour: "2-digit", minute: "2-digit" });
 const FMT_HMS = dataHora({ hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -242,7 +244,7 @@ function frase(d, sit, nm) {
       return "A apuração ainda não começou. Esta página se atualiza sozinha quando o TSE divulgar os primeiros resultados.";
     case "sem-projecao":
       if (c.pct_secoes >= d.projecao_desde_pct) return `${pc(c.pct_secoes, 1)} das seções foram apuradas. A projeção aparece em uma das próximas atualizações.`;
-      return `Só ${pc(c.pct_secoes, 1)} das seções foram apuradas. A projeção aparece quando a contagem chegar a ${n(d.projecao_desde_pct, 0)}%. Até lá, o total parcial diz pouco sobre o resultado final.`;
+      return `${c.pct_secoes > 0 && c.pct_secoes < 0.05 ? "Menos de 0,1%" : `Só ${pc(c.pct_secoes, 1)}`} das seções foram apuradas. A projeção aparece quando a contagem chegar a ${n(d.projecao_desde_pct, 0)}%. Até lá, o total parcial diz pouco sobre o resultado final.`;
     case "cruza":
     case "um-lado":
       return "";
@@ -305,7 +307,7 @@ function desenharResposta() {
     $("barra-contagem").style.setProperty("--p", `${apurado}%`);
     const margem = Math.abs(2 * apurado - 100);
     $("vantagem").textContent = margem < 0.005 ? "Empate" : `${apurado > 50 ? nm.esq : nm.dir} +${n(margem, 2)} p.p.`;
-    $("apuradas").textContent = pc(c.pct_secoes, c.pct_secoes % 1 ? 1 : 0);
+    $("apuradas").textContent = c.pct_secoes % 1 ? pcSecoes(c.pct_secoes) : pc(c.pct_secoes, 0);
     document.querySelector(".apurado").hidden = d.fase === "encerrada";
   }
 
@@ -396,7 +398,12 @@ function desenharGrafico() {
   const W = Math.max(280, host.clientWidth);
   const H = Math.round(Math.min(560, Math.max(300, W * 0.45)));
   const ultimo = serie.at(-1);
-  const agora = d.fase === "apurando" && ultimo.pct_secoes < 100;
+  // Antes de projecao_desde_pct a contagem oscila demais: fica fora do traçado e da escala.
+  const cedo = ultimo.pct_secoes < d.projecao_desde_pct;
+  $("legenda-contagem").hidden = cedo;
+  $("legenda-cedo").hidden = !cedo;
+  $("legenda-cedo").textContent = `Contagem: aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas`;
+  const agora = d.fase === "apurando" && ultimo.pct_secoes < 100 && !cedo;
   const M = { t: agora ? 26 : 10, r: 14, b: 44, l: 42 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
 
@@ -416,7 +423,7 @@ function desenharGrafico() {
   for (let k = -Math.floor(desvio / passo + 1e-9); k <= Math.floor(desvio / passo + 1e-9); k++) ticksY.push(Math.round((50 + k * passo) * 100) / 100);
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0", focusable: "true" });
-  svg.setAttribute("aria-label", `Gráfico da evolução. Último ponto: ${pc(ultimo.pct_secoes, 1)} das seções apuradas`
+  svg.setAttribute("aria-label", `Gráfico da evolução. Último ponto: ${pcSecoes(ultimo.pct_secoes)} das seções apuradas`
     + (ultimo.projecao ? `, projeção de ${nm.esq} em ${pc(ultimo.projecao.centro)} e de ${nm.dir} em ${pc(100 - ultimo.projecao.centro)}` : "")
     + `. Use as setas do teclado para percorrer os pontos. Os mesmos dados estão na tabela abaixo.`);
 
@@ -459,7 +466,7 @@ function desenharGrafico() {
   const pto = (x, y) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`;
   const espelhar = (v) => 100 - v;
   const igual = (v) => v;
-  const contagem = (f) => segmentos(serie, (q) => q.apurado).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
+  const contagem = (f) => segmentos(serie, (q) => (q.pct_secoes >= d.projecao_desde_pct ? q.apurado : null)).map((s) => "M" + s.map(([q, v]) => pto(q.pct_secoes, f(v))).join("L")).join("");
   const caminho = caminhoAteFim(ultimo);
   for (const li of $("legenda").querySelectorAll("[data-proj]")) li.hidden = !caminho.length;
   const fimLinha = (f) => caminho.length ? "M" + caminho.map((c) => pto(c.x, f(c.centro))).join("L") : "";
@@ -482,7 +489,7 @@ function desenharGrafico() {
       if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(100), cy: Y(v), r: 5 }));
     }
   }
-  for (const [cls, v] of pontosDe(ultimo.apurado)) {
+  for (const [cls, v] of pontosDe(cedo ? null : ultimo.apurado)) {
     if (dentro(v)) svg.append(sv("circle", { class: cls, cx: X(ultimo.pct_secoes), cy: Y(v), r: 4.5 }));
   }
 
