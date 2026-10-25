@@ -57,12 +57,12 @@ Em outro terminal, publique a projeção no GitHub Pages:
 caffeinate -i uv run eleicao publicar
 ```
 
-A cada minuto, o `publicar` envia `site/dados/projecao.json` para a branch `dados` e dispara o workflow do
+Assim que o `ao-vivo` regrava `site/dados/projecao.json`, o `publicar` envia o arquivo para a branch `dados` e dispara o workflow do
 Pages (`gh workflow run pages.yml --ref main`), que copia o arquivo dessa branch para o site. A `main` não
 recebe commits de dados. O comando precisa do `gh` logado com permissão de `workflow`.
 
 A página fica em https://ffreller.github.io/dashboard_eleicoes/. A contagem não depende do `publicar`. O
-navegador de cada leitor lê o arquivo nacional do TSE a cada 20 s, e a projeção chega a cada minuto.
+navegador de cada leitor lê o arquivo nacional do TSE a cada 20 s, e a projeção chega a cada ciclo do `ao-vivo`, logo depois de calculada.
 
 Se um dos processos cair, rode o mesmo comando de novo. A série já gravada é preservada, e o `publicar` não
 repete commits.

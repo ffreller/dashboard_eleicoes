@@ -125,3 +125,33 @@ def test_aproveita_a_branch_dados_que_ja_existe_no_origin(repo, tmp_path):
     Publicador(fonte, outro / "pub", Disparos()).ciclo()
     assert publicado(repo) == "18:01"
     assert git(outro / "pub", "rev-list", "--count", "HEAD") == "2"
+
+
+def test_vigiar_publica_assim_que_o_arquivo_muda(repo, tmp_path):
+    from eleicao.publicar import vigiar
+
+    fonte = tmp_path / "projecao.json"
+    gravar(fonte, "18:00")
+    preparar(repo, repo / "pub")
+    pub = Publicador(fonte, repo / "pub", Disparos())
+    horas = iter(["18:00:30", "18:01", "18:01"])
+
+    def dormir(_):
+        gravar(fonte, next(horas))
+
+    vigiar(pub, intervalo=3600, dormir=dormir, voltas=3)
+    assert publicado(repo) == "18:01"
+    assert git(repo / "pub", "rev-list", "--count", "HEAD") == "3"
+
+
+def test_vigiar_sem_mudanca_espera_o_intervalo(repo, tmp_path):
+    from eleicao.publicar import vigiar
+
+    fonte = tmp_path / "projecao.json"
+    gravar(fonte, "18:00")
+    preparar(repo, repo / "pub")
+    ciclos = []
+    pub = Publicador(fonte, repo / "pub", Disparos())
+    pub.ciclo = lambda: ciclos.append(1)
+    vigiar(pub, intervalo=3600, dormir=lambda _: None, voltas=5)
+    assert len(ciclos) == 1

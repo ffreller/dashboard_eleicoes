@@ -85,6 +85,27 @@ class Publicador:
         return _git(self.pasta, "rev-list", "--count", f"origin/{BRANCH}..HEAD").stdout.strip() != "0"
 
 
+def _mudou(fonte: Path) -> int | None:
+    return fonte.stat().st_mtime_ns if fonte.exists() else None
+
+
+def vigiar(publicador: Publicador, intervalo: float, dormir: Callable[[float], None] = time.sleep, voltas: int | None = None) -> None:
+    """Publica assim que a projeção regrava o arquivo, sem esperar o intervalo. O intervalo só marca quando
+    repetir um ciclo que falhou ou um disparo pendente, para não martelar o git e o gh a cada segundo."""
+    visto, ultimo = None, -float("inf")
+    while voltas is None or voltas > 0:
+        marca = _mudou(publicador.fonte)
+        if marca != visto or time.monotonic() - ultimo >= intervalo:
+            visto, ultimo = marca, time.monotonic()
+            try:
+                publicador.ciclo()
+            except subprocess.CalledProcessError as erro:
+                log.warning("falhou, nova tentativa em %gs: %s", intervalo, (erro.stderr or "").strip())
+        if voltas is not None:
+            voltas -= 1
+        dormir(1.0)
+
+
 def rodar(intervalo: float) -> None:
     if not logging.getLogger().handlers:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
@@ -92,12 +113,6 @@ def rodar(intervalo: float) -> None:
     preparar(config.RAIZ, pasta)
     publicador = Publicador(config.SITE / "dados" / ARQUIVO, pasta, lambda: disparar_pages(config.RAIZ))
     try:
-        while True:
-            inicio = time.monotonic()
-            try:
-                publicador.ciclo()
-            except subprocess.CalledProcessError as erro:
-                log.warning("falhou, nova tentativa em %gs: %s", intervalo, (erro.stderr or "").strip())
-            time.sleep(max(0.0, intervalo - (time.monotonic() - inicio)))
+        vigiar(publicador, intervalo)
     except KeyboardInterrupt:
         log.info("encerrado")

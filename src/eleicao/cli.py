@@ -24,7 +24,7 @@ def main() -> None:
     f.add_argument("--porta", type=int, default=8765)
 
     pb = sub.add_parser("publicar", help="envia site/dados/projecao.json para a branch dados e publica no GitHub Pages")
-    pb.add_argument("--intervalo", type=float, default=60, help="segundos entre envios")
+    pb.add_argument("--intervalo", type=float, default=60, help="segundos até repetir um envio que falhou (envia assim que o arquivo muda)")
 
     s = sub.add_parser("servir", help="serve a página em site/")
     s.add_argument("--porta", type=int, default=8000)
