@@ -1,4 +1,4 @@
-"""Gera site/dados/exemplo.json: um JSON fictício no formato que o pipeline grava, para desenvolver a página."""
+"""Gera site/dados/sintetico.json: um JSON fictício no formato que o pipeline grava, para desenvolver a página."""
 
 import json
 import math
@@ -80,6 +80,6 @@ doc = {
         ],
     },
 }
-with open("site/dados/exemplo.json", "w", encoding="utf-8") as f:
+with open("site/dados/sintetico.json", "w", encoding="utf-8") as f:
     json.dump(doc, f, ensure_ascii=False, indent=1)
 print(len(serie), "pontos")

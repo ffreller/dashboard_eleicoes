@@ -1,4 +1,4 @@
-"""Gera site/dados/exemplo-metade.json: a apuração de 2026 simulada até a metade, com o modelo de verdade.
+"""Gera site/dados/sintetico-metade.json: a apuração de 2026 simulada até a metade, com o modelo de verdade.
 
 O 2º turno é inventado (`cenario_sintetico`: o voto do 1º turno de cada seção mais uma mudança conhecida),
 as seções chegam na ordem real do 1º turno e cada ponto passa pelo mesmo `Modelo` e pela mesma `Saida`
@@ -18,7 +18,7 @@ SWING = 0.07
 base = Base.ler(BASES / "2026")
 cenario = cenario_sintetico(base, SWING, semente=11)
 for pct, _, proj in gravar_exemplo(
-    base, cenario, SITE / "dados" / "exemplo-metade.json",
+    base, cenario, SITE / "dados" / "sintetico-metade.json",
     lambda hora: datetime.fromisoformat(str(hora)[:19]).replace(year=2026, month=10, day=25),
 ):
     f = proj.brasil.projecao

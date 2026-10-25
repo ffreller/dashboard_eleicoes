@@ -64,4 +64,4 @@ Da raiz do repositório. O script lê os dados abertos do TSE de 2022 e 2026 em 
 uv run python scripts/ensaio_1t2026.py
 ```
 
-O script leva cerca de 1min40. Ele imprime a tabela acima e grava `site/dados/exemplo-1t2026.json`, que a página mostra em `?exemplo=1t2026`.
+O script leva cerca de 1min40. Ele imprime a tabela acima e grava `site/dados/sintetico-1t2026.json`, que a página mostra em `?sintetico=1t2026`.

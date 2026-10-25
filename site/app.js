@@ -58,8 +58,8 @@ function sv(tag, attrs, ...filhos) {
 }
 
 const params = new URLSearchParams(location.search);
-const ARQUIVO = params.has("exemplo")
-  ? params.get("exemplo") ? `dados/exemplo-${encodeURIComponent(params.get("exemplo"))}.json` : "dados/exemplo-metade.json"
+const ARQUIVO = params.has("sintetico")
+  ? params.get("sintetico") ? `dados/sintetico-${encodeURIComponent(params.get("sintetico"))}.json` : "dados/sintetico-metade.json"
   : "dados/projecao.json";
 
 const estado = {
@@ -951,7 +951,7 @@ function textoValidacao(d) {
 
 function desenhar() {
   const d = estado.dados;
-  $("aviso-exemplo").hidden = !d.exemplo;
+  $("aviso-sintetico").hidden = !d.exemplo;
   desenharResposta();
   desenharGrafico();
   desenharComparacao();

@@ -1,6 +1,6 @@
-"""Deriva de site/dados/exemplo.json os JSONs fictícios de cada fase da apuração, para testar a página.
+"""Deriva de site/dados/sintetico.json os JSONs fictícios de cada fase da apuração, para testar a página.
 
-Gera exemplo-aguardando, exemplo-inicio, exemplo-vantagem e exemplo-encerrada em site/dados/.
+Gera sintetico-aguardando, sintetico-inicio, sintetico-vantagem e sintetico-encerrada em site/dados/.
 Rode da raiz do repositório: uv run python scripts/gerar_exemplos_fases.py
 """
 
@@ -11,11 +11,11 @@ from pathlib import Path
 from statistics import NormalDist
 
 DADOS = Path("site/dados")
-base = json.loads((DADOS / "exemplo.json").read_text(encoding="utf-8"))
+base = json.loads((DADOS / "sintetico.json").read_text(encoding="utf-8"))
 
 
 def gravar(nome: str, doc: dict) -> None:
-    (DADOS / f"exemplo-{nome}.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    (DADOS / f"sintetico-{nome}.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(nome, len(doc["serie"]), "pontos")
 
 

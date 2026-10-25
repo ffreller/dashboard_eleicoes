@@ -1,6 +1,6 @@
 """Grava site/dados/projecao.json, o único arquivo que a página lê.
 
-O formato está exemplificado em site/dados/exemplo.json (gerado por scripts/gerar_exemplo.py).
+O formato está exemplificado em site/dados/sintetico.json (gerado por scripts/gerar_exemplo.py).
 Percentuais são da esquerda sobre os votos válidos; a página mostra a direita como 100 − esquerda.
 Reiniciar o processo no meio da apuração preserva a série já gravada.
 """

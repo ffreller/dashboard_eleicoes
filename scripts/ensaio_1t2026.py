@@ -5,7 +5,7 @@ Como o 1º turno de 2026 não pode ser referência dele mesmo, a base troca de a
 2022 na mesma seção (Lula 13 × Bolsonaro 22), base B é o 2º turno de 2022 pareado por local. Seção de 2026
 sem a mesma seção em 2022 recebe as taxas por eleitor do seu município em 2022 (ou da UF).
 
-Grava site/dados/exemplo-1t2026.json até 50% das seções. Rode da raiz do repositório:
+Grava site/dados/sintetico-1t2026.json até 50% das seções. Rode da raiz do repositório:
 
     uv run python scripts/ensaio_1t2026.py
 """
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     base, cenario = montar()
     final = 100 * cenario["esq"].sum() / (cenario["esq"].sum() + cenario["dir"].sum())
     for pct, momento, proj in gravar_exemplo(
-        base, cenario, SITE / "dados" / "exemplo-1t2026.json", lambda hora: datetime.fromisoformat(str(hora)[:19])
+        base, cenario, SITE / "dados" / "sintetico-1t2026.json", lambda hora: datetime.fromisoformat(str(hora)[:19])
     ):
         f = proj.brasil.projecao
         if f:

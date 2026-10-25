@@ -145,7 +145,7 @@ a:hover { text-decoration-thickness: 2px; }
 }
 .botao-tema:hover { background: var(--wash); color: var(--ink); }
 
-.faixa-exemplo {
+.faixa-sintetico {
   margin-top: 12px; padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 10px;
   background: var(--aviso-bg); color: var(--aviso-ink); font-size: 0.875rem;
 }
