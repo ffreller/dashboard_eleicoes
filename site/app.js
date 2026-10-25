@@ -63,6 +63,11 @@ const params = new URLSearchParams(location.search);
 const ARQUIVO = params.has("sintetico")
   ? params.get("sintetico") ? `dados/sintetico-${encodeURIComponent(params.get("sintetico"))}.json` : "dados/sintetico-metade.json"
   : "dados/projecao.json";
+// O Pages às vezes passa minutos sem aplicar deploys que terminaram com sucesso, e o raw da branch `dados` tem cache
+// de até 5 min. Os dois atrasam em momentos diferentes, então a página lê os dois e fica com o mais novo.
+const FONTES = params.has("sintetico")
+  ? [ARQUIVO]
+  : [ARQUIVO, "https://raw.githubusercontent.com/ffreller/dashboard_eleicoes/dados/projecao.json"];
 
 const estado = {
   dados: null,
@@ -88,20 +93,26 @@ function validar(d) {
 
 let temporizador = 0;
 
+async function baixar(url) {
+  const r = await fetch(`${url}?t=${Date.now()}`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined,
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const texto = await r.text();
+  return { texto, d: validar(JSON.parse(texto)) };
+}
+
 async function buscar() {
   clearTimeout(temporizador);
   let segundos = ATUALIZAR_S;
   try {
-    const r = await fetch(`${ARQUIVO}?t=${Date.now()}`, {
-      cache: "no-store",
-      signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined,
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const texto = await r.text();
-    // Cada nó do CDN do Pages troca de versão numa hora diferente, então uma resposta pode ser mais antiga que a
-    // anterior. Aceitá-la faria a página recuar.
-    const novo = texto !== estado.bruto && validar(JSON.parse(texto));
-    if (novo && !(Date.parse(novo.atualizado) < Date.parse(estado.dados?.atualizado))) {
+    const lidos = (await Promise.allSettled(FONTES.map(baixar))).filter((l) => l.status === "fulfilled").map((l) => l.value);
+    if (!lidos.length) throw new Error("nenhuma fonte respondeu");
+    const { texto, d: novo } = lidos.reduce((a, b) => (Date.parse(b.d.atualizado) > Date.parse(a.d.atualizado) ? b : a));
+    // Cada nó do CDN troca de versão numa hora diferente, então uma resposta pode ser mais antiga que a anterior.
+    // Aceitá-la faria a página recuar.
+    if (texto !== estado.bruto && !(Date.parse(novo.atualizado) < Date.parse(estado.dados?.atualizado))) {
       estado.dados = novo;
       estado.bruto = texto;
       desenhar();
