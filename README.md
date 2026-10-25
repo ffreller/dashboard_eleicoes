@@ -96,6 +96,10 @@ a simulação da metade: `uv run python scripts/gerar_exemplo_metade.py`.
 
 Este projeto foi inspirado pela [página de projeção](https://projecao.2026elections.workers.dev/) criada por Rodrigo Mahlmeister ([@ro_mahl](https://x.com/ro_mahl)) para as previsões do 1º turno de 2026. A estrutura geral do método (medir a mudança de voto nos municípios já apurados, explicá-la por uma regressão hierárquica do perfil do lugar e aplicá-la às seções que faltam) segue a ideia descrita na página dele, que foi lida antes de desenharmos o modelo. O código, a base de dados e a implementação são próprios.
 
+## Autoria
+
+Fabio Freller, cientista de dados e bacharel em relações internacionais ([f.freller@gmail.com](mailto:f.freller@gmail.com)).
+
 ## Desenvolvimento
 
 Projeto desenvolvido com o auxílio do [Claude Code](https://claude.com/claude-code).
