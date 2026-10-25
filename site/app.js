@@ -197,7 +197,7 @@ function desenharStatus() {
   let msg;
   if (estado.falha && !d) msg = `Não foi possível carregar os dados às ${hms(estado.falha)}. Nova tentativa às ${hms(estado.proximo)}.`;
   else if (estado.falha) msg = `Não foi possível atualizar às ${hms(estado.falha)}. Continuamos mostrando os dados de ${hms(d.atualizado)}. Nova tentativa às ${hms(estado.proximo)}.`;
-  else if (d && estado.tse) msg = `Contagem do TSE das ${hms(estado.tse.hora)}. Projeção atualizada às ${hms(d.atualizado)} (Brasília).`;
+  else if (d && contagem(d)) msg = `Contagem do TSE das ${hms(contagem(d).hora)}. Projeção atualizada às ${hms(d.atualizado)} (Brasília).`;
   else if (d) msg = `Dados atualizados às ${hms(d.atualizado)} (Brasília).`;
   else msg = "Carregando os dados…";
   if (d && estado.tseFalha) msg += ` O TSE não responde desde ${hms(estado.tseFalha)}.`;
