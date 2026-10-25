@@ -87,6 +87,19 @@ Para ver a página com dados fictícios, abra `http://localhost:8000/?sintetico`
 do 1º turno de 2026 de cada seção, apurado até a metade e projetado pelo modelo de verdade) ou `?sintetico=aguardando|inicio|vantagem|encerrada`. Para refazer
 a simulação da metade: `uv run python scripts/gerar_exemplo_metade.py`.
 
+## Comparar com outras projeções
+
+`scripts/monitorar.py` é uma ferramenta local, fora do pacote `eleicao` e fora do git (está no `.gitignore`). Ela
+consulta a cada 30 s as projeções do PET e do Estadão e registra, para cada limiar de seções apuradas (1% a 10%,
+depois de 5 em 5), o que cada uma mostrava e a que horas a vimos. Serve para conferir a nossa projeção contra
+as deles e medir a defasagem de cada fonte. Saídas, gravadas na pasta do próprio script (`scripts/`): `snapshots.jsonl` (cada
+mudança nos dados das fontes), `limiares.csv` (a tabela por limiar) e o log, com avisos `ERRO` se uma fonte
+cair ou o artigo do Estadão mudar de endereço.
+
+```sh
+caffeinate -i python3 -I scripts/monitorar.py > scripts/log.txt 2>&1
+```
+
 ## Fontes
 
 - Divulgação de resultados do TSE: `resultados.tse.jus.br` (eleição 6258, pleito 3221).

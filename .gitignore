@@ -13,3 +13,4 @@ wheels/
 data/
 site/dados/projecao.json
 .claude/worktrees/
+scripts/monitorar.py
