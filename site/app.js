@@ -617,7 +617,7 @@ const CURTO_ESTREITO = { ...CURTO, "1t2026": "1ºT" };
 const sinal = (v, d = 1) => (Math.abs(v) < 0.5 * 10 ** -d ? n(0, d) : (v > 0 ? "+" : "−") + n(Math.abs(v), d));
 
 function curvasComparacao(d) {
-  const atual = d.fase === "aguardando" ? [] : d.serie.filter((q) => q.apurado != null).map((q) => [q.pct_secoes, 2 * q.apurado - 100]);
+  const atual = d.fase === "aguardando" ? [] : d.serie.filter((q) => q.apurado != null && q.pct_secoes >= d.projecao_desde_pct).map((q) => [q.pct_secoes, 2 * q.apurado - 100]);
   const rotulo = `2º turno de 2026 (${d.fase === "encerrada" ? "final" : "agora"})`;
   return [{ id: "atual", rotulo, pontos: atual }, ...estado.referencias.curvas].filter((c) => c.pontos.length);
 }
@@ -641,10 +641,14 @@ function desenharComparacao() {
   desenhoComparacao = null;
 
   const curvas = curvasComparacao(d);
-  $("legenda-comparacao").replaceChildren(...curvas.map((c) => el("li", {}, el("i", { class: `sw-cmp cmp-${c.id}` }), c.rotulo)));
+  const semAtual = d.fase !== "aguardando" && !curvas.some((c) => c.id === "atual");
+  $("legenda-comparacao").replaceChildren(
+    ...curvas.map((c) => el("li", {}, el("i", { class: `sw-cmp cmp-${c.id}` }), c.rotulo)),
+    ...(semAtual ? [el("li", {}, `2º turno de 2026: aparece a partir de ${n(d.projecao_desde_pct, 0)}% das seções apuradas`)] : []),
+  );
 
   const ultimo = d.serie.at(-1);
-  const agora = d.fase === "apurando" && ultimo && ultimo.pct_secoes < 100;
+  const agora = d.fase === "apurando" && ultimo && ultimo.pct_secoes < 100 && !semAtual;
   const W = Math.max(280, host.clientWidth);
   const H = Math.round(Math.min(480, Math.max(260, W * 0.42)));
   const estreito = W < 480;
